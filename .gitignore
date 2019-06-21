@@ -143,5 +143,5 @@ gen
 out/
 gen/
 Inputs/
-Outpus/
+Outputs/
 PandasTemplate_old.py
