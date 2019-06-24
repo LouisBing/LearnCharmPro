@@ -16,10 +16,10 @@ folder = inputsList[0]
 print(folder)
 # 相关输出文件设置
 outfile_xls = folder + '\\' + folder[folder.rfind('\\')+1:] + '_PANDAS汇总_' + '.xlsx'
-print(outfile_xls)
 # 如果汇总文件已存在，直接删除
 isx = os.path.exists(outfile_xls)
 if(isx):
+    print('DelExistFile:', outfile_xls)
     os.remove(outfile_xls)
 
 # 相关输入：目录下所有文件
@@ -28,11 +28,14 @@ print(len(fileList))
 # ------------------------------------------------------------------------------------------
 # 数据导入
 exlist = []
+headerlist = []
+headerrows = 3
 oldexlist = []
 for file in fileList:
     if '.xls' in file:
         print(file)
-        sf = pd.read_excel(file, sheet_name=0, header=None, skiprows=[0, 1, 2])
+        sf = pd.read_excel(file, sheet_name=0, header=None, skiprows=range(headerrows))
+        sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
         # sf = pd.read_excel(file, sheet_name=0, header=[0,1,2])
         # sf.columns = sidf_header.columns[0:len(sf.columns)]
         # sf.drop([0,1,2], inplace=True)
@@ -49,9 +52,11 @@ for file in fileList:
         # sf['更新时间'] = mt
         # # exdic[file] = sf
         exlist.append(sf)
+        headerlist.append(sfH)
 
 # 数据汇总
 sfall = pd.concat(exlist,sort=False)
+sf_Header = pd.concat(headerlist,sort=False)
 
 # fileR = r'Inputs\Test.xlsx'
 # # ------------------------------------------------------------------------------------------
@@ -86,6 +91,12 @@ sfall = pd.concat(exlist,sort=False)
 # idf1.sort_values('sum')
 
 # ------------------------------------------------------------------------------------------
-# 单文件单表输出
-sfall.to_excel(outfile_xls, sheet_name='all')
+# # 单文件单表输出
+# sfall.to_excel(outfile_xls, sheet_name='all')
+
+# 单文件多表输出
+writer = ExcelWriter(outfile_xls,engine='xlsxwriter')
+sfall.to_excel(writer,sheet_name='数据汇总')
+sf_Header.to_excel(writer,sheet_name='表头汇总')
+writer.save()
 
