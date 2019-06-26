@@ -62,23 +62,39 @@ print(len(fileList))
 # sfall = pd.concat(exlist,sort=False)
 # sf_Header = pd.concat(headerlist,sort=False)
 
-# ------------------------------------------------------------------------------------------
+# # ------------------------------------------------------------------------------------------
 # 数据导入
 newDf = pd.read_excel(newFile, sheet_name=0, header=[0,])
+newDf[newDf=='?']=np.nan
+newDf.dropna(subset=newDf.columns[-4:],how='all',inplace=True)
 newDf['月份'] = 'NEW'
+
 preDf = pd.read_excel(preFile, sheet_name=0, header=[0,])
+preDf[preDf=='?']=np.nan
+preDf.dropna(subset=preDf.columns[-3:],how='all',inplace=True)
+dupSet = preDf.columns.drop(['签约主体','客户名称','签署地市名称'])
 preDf['月份'] = 'PRE'
+
 sfall = pd.concat([newDf,preDf],sort=False)
-dupSet = sfall.columns[1:1+6]
+
+# ------------------------------------------------------------------------------------------
+# fileR = r'Inputs\Test.xlsx'
+# 数据导入
+# xlsx = pd.ExcelFile(preFile)
+# sidf_header = pd.read_excel(xlsx, sheet_name=0, header=[0,])
+# sidf_header[sidf_header =='?'] = np.nan
+# sidf_header.dropna(subset=sidf_header.columns[-3:],how='all',inplace=True)
+
+sidf_name = pd.read_excel(preFile, sheet_name=3, header=[0,])
+sidf_name.drop_duplicates(['key_desc','key_type_desc'],inplace=True)
+sfall = pd.merge(sfall,sidf_name[['key_desc','key_type_desc']],how='left',left_on='签约主体',right_on='key_desc')
+
+# # dupSet = sfall.columns[1:1+6]
+# dupSet = sfall.columns.drop(['签约主体','key_desc'])
+dupSet = dupSet.append(sfall.columns[[-1,]])
 print(dupSet)
 sfall['DUP'] = sfall.duplicated(subset=dupSet,keep=False)
 
-# # ------------------------------------------------------------------------------------------
-# fileR = r'Inputs\Test.xlsx'
-# # 数据导入
-# xlsx = pd.ExcelFile(fileR)
-# sidf_header = pd.read_excel(xlsx, sheet_name=1, header=[0,])
-#
 # # ------------------------------------------------------------------------------------------
 # # 数据检查
 # print(sidf_header.shape)
@@ -109,9 +125,16 @@ sfall['DUP'] = sfall.duplicated(subset=dupSet,keep=False)
 # # 单文件单表输出
 # sfall.to_excel(outfile_xls, sheet_name='all')
 
-# 单文件多表输出
-writer = ExcelWriter(outfile_xls,engine='xlsxwriter')
-sfall.to_excel(writer,sheet_name='数据汇总')
-# sf_Header.to_excel(writer,sheet_name='表头汇总')
-writer.save()
+# # 单文件多表输出
+# writer = ExcelWriter(outfile_xls,engine='xlsxwriter')
+# sfall.to_excel(writer,sheet_name='数据汇总')
+# # sf_Header.to_excel(writer,sheet_name='表头汇总')
+# writer.save()
 
+
+# 数据输出
+fileR = newFile
+tNow = time.strftime("%H%M%S", time.localtime())
+fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
+# 单表输出
+sfall.to_excel(fileW)
