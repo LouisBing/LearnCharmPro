@@ -67,8 +67,12 @@ sfall = pd.concat(exlist,sort=False)
 sf_Header = pd.concat(headerlist,sort=False)
 
 # 数据清洗
-sfall.loc[sfall[0].str.contains('注：') == True, 0] = np.nan
-sfall[sfall.isin([' ','\t','\\'])] = np.nan
+# sfall.loc[sfall[0].str.contains('注：') == True, 0] = np.nan
+# sfall[sfall.isin([' ','\t','\\'])] = np.nan
+# sfall.replace([' ','\t','\\'],np.nan,inplace=True)
+# sfall.replace([r'^[\s\\]+$',r'^注：.*'],np.nan,regex=True,inplace=True)
+sfall.replace([r'^[\W]+$',r'^注：.*'],np.nan,regex=True,inplace=True)
+
 sfall.dropna(how='all',inplace=True)
 # # ------------------------------------------------------------------------------------------
 # # 场景:重复数据比对
