@@ -72,6 +72,7 @@ sfall.replace([r'^[\W]+$',r'^注：.*'],np.nan,regex=True,inplace=True)
 print(sfall.columns[:20])
 sfall.dropna(subset=sfall.columns[:20] ,how='all',inplace=True)
 sfall[1].fillna(method='pad',inplace=True)
+sfall.loc[:,1]  = sfall.loc[:,1].map(str.strip,na_action='ignore')
 # sfall.sort_values(by=['更新时间',0],inplace=True,ascending=False)
 
 
@@ -116,6 +117,11 @@ sf_pivtable = sf_new.pivot_table(values=19, index=[9, 12, 11, 13, 1, 2, 7], aggf
 sf_sort = sf_new.loc[sf_new.iloc[:,10]=='是',:]
 sf_sort.sort_values(by=[9,12,11,13,1,2,7],ascending=True,inplace=True)
 sf_sort = sf_sort[sf_sort.columns.drop([3,4,5,6,8])]
+
+
+# # 删除一些行不如筛选一些行更方便直观
+# midsf.drop(midsf[midsf['历史数据']==True].index,inplace=True)
+# midsf = midsf[midsf['历史数据']==False]
 
 # # ------------------------------------------------------------------------------------------
 # # 场景:重复数据比对
