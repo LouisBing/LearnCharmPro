@@ -2,7 +2,7 @@
 
 from pandas import Series, DataFrame, np, ExcelWriter
 import pandas as pd
-import os, time
+import os, time, shutil
 import TxtOperator, FileOperator
 from io import StringIO
 
@@ -49,22 +49,19 @@ for file in fileList:
         # sf.drop([0,1,2], inplace=True)
         # # 为防止合并后列的重排，将列名重置为数字
         # sf.columns = range(len(sf.columns))
-        #
-        # sf[sf == ' '] = np.nan
-        # sf.dropna(subset=sf.columns[1:2],how='all',inplace=True)
-        # sf[1] = sf[1].map(str.strip)
-        #
-        # # 新增更新时间列
-        # t = os.path.getmtime(file)
-        # mt = time.strftime("%Y%m%d%H%M%S", time.localtime(t))
-        # sf['更新时间'] = mt
+
+        # 新增更新时间列
+        t = os.path.getmtime(file)
+        mt = time.strftime("%Y%m%d%H%M%S", time.localtime(t))
+        sf['更新时间'] = mt
+        sf['文件名'] = file
         # # exdic[file] = sf
         exlist.append(sf)
         headerlist.append(sfH)
 
 # 数据连接
-sfall = pd.concat(exlist,sort=False)
-sf_Header = pd.concat(headerlist,sort=False)
+sfall = pd.concat(exlist,sort=False,ignore_index=True)
+sf_Header = pd.concat(headerlist,sort=False,ignore_index=True)
 
 # 数据清洗
 # sfall.loc[sfall[0].str.contains('注：') == True, 0] = np.nan
@@ -72,8 +69,54 @@ sf_Header = pd.concat(headerlist,sort=False)
 # sfall.replace([' ','\t','\\'],np.nan,inplace=True)
 # sfall.replace([r'^[\s\\]+$',r'^注：.*'],np.nan,regex=True,inplace=True)
 sfall.replace([r'^[\W]+$',r'^注：.*'],np.nan,regex=True,inplace=True)
+print(sfall.columns[:20])
+sfall.dropna(subset=sfall.columns[:20] ,how='all',inplace=True)
+sfall[1].fillna(method='pad',inplace=True)
+# sfall.sort_values(by=['更新时间',0],inplace=True,ascending=False)
 
-sfall.dropna(how='all',inplace=True)
+
+midsf = sfall[[1,'更新时间','文件名']]
+midsf.drop_duplicates(inplace=True)
+midsf.sort_values(by='更新时间',ascending=False,inplace=True)
+midsf['异常文件']=midsf.duplicated(subset='文件名',keep=False)
+midsf2=midsf[midsf['异常文件']==False]
+midsf['历史数据']=midsf2.duplicated(subset=1)
+
+sfall = pd.merge(sfall,midsf,how='left')
+
+sf_new = sfall[sfall['历史数据']==False]
+sf_history = sfall[sfall['历史数据']==True]
+sf_error = sfall[sfall['异常文件']==True]
+
+# 场景:文件分类
+# def fileMove(df,dir):
+#     moveFile = df['文件名']
+#     dir = folder
+#     shutil.move(moveFile, dir)
+#
+# strNow = time.strftime("%Y%m%d%H%M%S", time.localtime())
+# sf_filemove = midsf[midsf['历史数据']==False]
+# dir = folder + r'\最新文件' + strNow
+# os.makedirs(dir)
+# sf_filemove.apply(fileMove, axis=1,  args=(dir,))
+#
+# sf_filemove = midsf[midsf['历史数据']==True]
+# dir = folder + r'\历史文件' + strNow
+# os.makedirs(dir)
+# sf_filemove.apply(fileMove, axis=1,  args=(dir,))
+#
+# sf_filemove = midsf[midsf['异常文件']==True]
+# sf_filemove.drop_duplicates(subset='文件名', inplace=True)
+# dir = folder + r'\异常文件' + strNow
+# os.makedirs(dir)
+# sf_filemove.apply(fileMove, axis=1,  args=(dir,))
+
+sf_pivtable = sf_new.pivot_table(values=19, index=[9, 12, 11, 13, 1, 2, 7], aggfunc=np.count_nonzero)
+# print(sf_new.iloc[:,10])
+sf_sort = sf_new.loc[sf_new.iloc[:,10]=='是',:]
+sf_sort.sort_values(by=[9,12,11,13,1,2,7],ascending=True,inplace=True)
+sf_sort = sf_sort[sf_sort.columns.drop([3,4,5,6,8])]
+
 # # ------------------------------------------------------------------------------------------
 # # 场景:重复数据比对
 # # 新数据导入,新增标签列
@@ -105,12 +148,20 @@ sfall.dropna(how='all',inplace=True)
 # # 根据列名生成重复标签列
 # sfall['DUP'] = sfall.duplicated(subset=dupSet,keep=False)
 # ------------------------------------------------------------------------------------------
-# fileR = r'Inputs\Test.xlsx'
-# 数据导入
-# xlsx = pd.ExcelFile(preFile)
-# sidf_header = pd.read_excel(xlsx, sheet_name=0, header=[0,])
-# sidf_header[sidf_header =='?'] = np.nan
-# sidf_header.dropna(subset=sidf_header.columns[-3:],how='all',inplace=True)
+# # 场景：表头专门处理
+# # 数据导入
+# header_file = inputsList[3]
+# xlsx = pd.ExcelFile(header_file)
+# sidf_header = pd.read_excel(xlsx, sheet_name=1, header=[0])
+# sidf_header.columns.name='列名'
+# # sidf_header.columns.names=('a','b')
+# # sidf_header[sidf_header =='?'] = np.nan
+# # sidf_header.dropna(subset=sidf_header.columns[-3:],how='all',inplace=True)
+#
+# # header_file = inputsList[3]
+# # xlsx = pd.ExcelFile(header_file)
+# # sidf_header = pd.read_excel(xlsx, sheet_name=1, nrows=2, header=None)
+# # sidf_header.columns.name='列名'
 
 # # ------------------------------------------------------------------------------------------
 # # 数据检查
@@ -139,19 +190,24 @@ sfall.dropna(how='all',inplace=True)
 # idf1.sort_values('sum')
 
 # ------------------------------------------------------------------------------------------
-# # 场景:数据导出
-# # 根据文件名自动生成输出文件名
-# fileR = newFile
+# 场景:数据导出
+# 根据文件名自动生成输出文件名
+# fileR = header_file
 # tNow = time.strftime("%H%M%S", time.localtime())
 # fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
 # # 单表输出
-# sfall.to_excel(fileW)
+# sidf_header.to_excel(fileW)
 
 # # 已知导出文件名,单文件单表输出
 # sfall.to_excel(outfile_xls, sheet_name='all')
 
 # 已知导出文件名,单文件多表输出
 writer = ExcelWriter(outfile_xls,engine='xlsxwriter')
-sfall.to_excel(writer,sheet_name='数据汇总')
+sf_new.to_excel(writer,sheet_name='最新数据')
+sf_history.to_excel(writer,sheet_name='历史数据')
 sf_Header.to_excel(writer,sheet_name='表头汇总')
+sf_error.to_excel(writer,sheet_name='异常文件')
+midsf.to_excel(writer,sheet_name='中间表')
+sf_pivtable.to_excel(writer, sheet_name='透视')
+sf_sort.to_excel(writer, sheet_name='排序')
 writer.save()
