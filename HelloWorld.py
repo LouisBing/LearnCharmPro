@@ -6,4 +6,4 @@ sum = 0
 for i in range(1,11):
     print('this is =', i)
     sum += i
-print(sum)
+print('SUM=%s' % sum)
