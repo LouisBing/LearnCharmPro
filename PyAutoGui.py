@@ -99,7 +99,8 @@ for i in range(num):
         elif giop == 'cv':
             paste(READ)
             print('CV-OK')
-
+        elif giop == 'ps':
+            pyautogui.press(gidata)
 
     timeList = 'tTodo=%.2f,tN=%.2f,tUp=%.2f,tUpJt=%.2f' % tuple(tSlist)
     print(timeList)
