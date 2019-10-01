@@ -1,4 +1,9 @@
 {
     "editor.fontSize": 16,
-    "python.linting.enabled": false
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": false,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": [
+        "--disable=all", "--enable=F,E", "--disable=abstract-class-instantiated"
+    ]
 }
