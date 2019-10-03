@@ -32,8 +32,8 @@ def readTxt2List(txtFile,allList=True):
             if line[0] != u'#':
                 line = line.strip()
                 inputsList.append(line)
-    return inputsList
     cmds.close()
+    return inputsList
 
 def writeList2Txt(txtFile, valueList, op=u'w'):
     cmd_tracert_result = open(txtFile, op, encoding='utf-8')
