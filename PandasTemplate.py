@@ -1,4 +1,5 @@
 #-*-coding:utf-8-*-
+#%%
 
 import os
 import shutil
@@ -16,8 +17,12 @@ import TxtOperator
 txtFile = r'Inputs\PandasTemplate.txt'
 inputsList = TxtOperator.readTxt2List(txtFile,False)
 print(inputsList)
-
-SCENE = 1
+#%% 全局表头文件，用于替换表头。如果哪个场景需要替换表头，可以使用此表数据
+header_file = inputsList[3]
+sidf_header = pd.read_excel(header_file, sheet_name=3, header=0, index_col=0)
+# sidf_header.fillna(method='ffill')
+#%%
+SCENE = 0
 if SCENE == 0:  
     # ------------------------------------------------------------------------------------------
     # 场景:读取文件夹下所有Excel文件进行连接合并
@@ -79,7 +84,7 @@ if SCENE == 0:
     sfall.dropna(subset=sfall.columns[:20] ,how='all',inplace=True)
     # 数据清洗-填充空值
     sfall[1].fillna(method='pad',inplace=True)
-    # 数据清洗-单元格处理，删除单元格空格
+    # 数据清洗-函数级应用:单元格处理，删除单元格空格
     sfall.loc[:,1]  = sfall.loc[:,1].map(str.strip,na_action='ignore')
     # sfall.sort_values(by=['更新时间',0],inplace=True,ascending=False)
 
@@ -129,9 +134,15 @@ if SCENE == 0:
     sf_sort.sort_values(by=[9,12,11,13,1,2,7],ascending=True,inplace=True)
     sf_sort = sf_sort[sf_sort.columns.drop([3,4,5,6,8])]
 
-    # # 删除一些行不如筛选一些行更方便直观
+    # # 数据清洗-筛选.删除一些行不如筛选一些行更方便直观
     # midsf.drop(midsf[midsf['历史数据']==True].index,inplace=True)
     # midsf = midsf[midsf['历史数据']==False]
+    
+    # 替换表头
+    headerindex = 2
+    title = sidf_header.loc[headerindex,:]
+    title.dropna(inplace=True)
+    sf_new.rename(columns=title, inplace=True)
 
     # 已知导出文件名,单文件多表输出
     writer = ExcelWriter(outfile_xls,engine='xlsxwriter')
@@ -186,7 +197,7 @@ elif SCENE == 1:
     # dupSet = sfall.columns.drop(['签约主体','key_desc'])
     dupSet = dupSet.append(sfall.columns[[-1,]])
     print(dupSet)
-    # 数据预处理-判断重复行：根据列名生成重复标签列
+    # 数据规整-判断重复行：根据列名生成重复标签列
     sfall['DUP'] = sfall.duplicated(subset=dupSet,keep=False)
     
     # 根据文件名自动生成输出文件名
@@ -212,7 +223,7 @@ elif SCENE == 2:
     
     # header与skiprows：跳过这些行，下面的行从0编号开始读取。如skiprows=0，即跳过第1行，然后header=0，则原表中第2行为表头。
     # 如果直接header=1，则默认跳过第1行
-    
+
     # 根据输入文件名自动生成输出文件名
     tNow = time.strftime("%H%M%S", time.localtime())
     fileW = header_file[:header_file.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
