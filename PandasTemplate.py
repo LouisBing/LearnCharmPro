@@ -142,7 +142,9 @@ if SCENE == 0:
     headerindex = 2
     title = sidf_header.loc[headerindex,:]
     title.dropna(inplace=True)
-    sf_new.rename(columns=title, inplace=True)
+    renamelist = [sf_new,sf_history,sf_Header,sf_error,midsf,sf_pivtable,sf_sort]
+    for df in renamelist:
+        df.rename(columns=title, inplace=True)
 
     # 已知导出文件名,单文件多表输出
     writer = ExcelWriter(outfile_xls,engine='xlsxwriter')
