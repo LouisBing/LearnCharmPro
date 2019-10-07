@@ -1,12 +1,13 @@
 #-*-coding:utf-8-*-
-
+#%%
+import time
 import numpy as np
 import pandas as pd
+from pandas import DataFrame, ExcelWriter, Series, np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings; warnings.filterwarnings(action='once')
-
 # ------------------------------------------------------------------------------------------
 # # 官方事例
 # # fig = plt.figure()  # an empty figure with no axes
@@ -192,34 +193,76 @@ import warnings; warnings.filterwarnings(action='once')
 # #               xlabel='Area', ylabel='Population')
 # plt.show()
 # ------------------------------------------------------------------------------------------
+#%%
 xlsx = r'Inputs\MX960-95计费(2015-02).xlsx'
 sf_CDN = pd.read_excel(xlsx,header=2,sheet_name=1)
 n95 = int(sf_CDN.shape[0]*0.05)+1
 sf_CDN.sort_values('Traffic_In(Mbps)',ascending=False,inplace=True)
+#%%
+# sf_CDN['95']='IN'
+# sf_CDN.iloc[:n95,3]='OUT'
+# sf_CDN.iloc[n95,3]='OK'
 
-sf_CDN['95']='IN'
-sf_CDN.iloc[:n95,3]='OUT'
-sf_CDN.iloc[n95,3]='OK'
-
-sf_CDN.sort_values('时间',inplace=True)
-plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OUT'][::12],color="red",label="S-OUT",linewidths=0.0001)
-plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OK'][::12],color="blue",label="S-OK",linewidths=0.0001)
-plt.plot('NO', 'Traffic_In(Mbps)', data=sf_CDN[::12],color="blue",label="L-OK")
-x = [sf_CDN.iloc[0,0],sf_CDN.iloc[-1,0]]
-y = sf_CDN.loc[sf_CDN['95']=='OK','Traffic_In(Mbps)']
-y = [y.iloc[0],y.iloc[0]]
-plt.plot(x,y,label='95',color="red")
-# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='IN'][::12],color='green',label="IN",linewidths=0.0001)
-# plt.gca().set(xlim=(20190101000000, 20190201000000), ylim=(0, 90000000),
-#
-#               xlabel='Area', ylabel='Population')
+# sf_CDN.sort_values('时间',inplace=True)
+# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OUT'][::12],color="red",label="S-OUT",linewidths=0.0001)
+# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OK'][::12],color="blue",label="S-OK",linewidths=0.0001)
+# plt.plot('NO', 'Traffic_In(Mbps)', data=sf_CDN[::12],color="blue",label="L-OK")
+# x = [sf_CDN.iloc[0,0],sf_CDN.iloc[-1,0]]
+# y = sf_CDN.loc[sf_CDN['95']=='OK','Traffic_In(Mbps)']
+# y = [y.iloc[0],y.iloc[0]]
+# plt.plot(x,y,label='95',color="red")
+# # plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='IN'][::12],color='green',label="IN",linewidths=0.0001)
+# # plt.gca().set(xlim=(20190101000000, 20190201000000), ylim=(0, 90000000), xlabel='Area', ylabel='Population')
 
 
-xloc_date = sf_CDN.loc[:, '时间']
-xloc_date = xloc_date.apply(lambda x:x.split()[0])
-xloc_date.drop_duplicates(inplace=True)
+# xloc_date = sf_CDN.loc[:, '时间']
+# xloc_date = xloc_date.apply(lambda x:x.split()[0])
+# xloc_date.drop_duplicates(inplace=True)
 
-plt.xticks(ticks=xloc_date.index.to_list(),labels=xloc_date.to_list(),rotation=30)
+# plt.xticks(ticks=xloc_date.index.to_list(),labels=xloc_date.to_list(),rotation=30)
 
-plt.legend()
-plt.show()
+# plt.legend()
+# plt.show()
+#%%
+mx = pd.read_excel(xlsx,header=[1,2],sheet_name=0)
+mx.replace([r'^[\D]+.*'],np.nan,regex=True,inplace=True)
+#%%
+mx.dropna(how='all', axis=1, inplace=True)
+#%%
+idx = pd.IndexSlice
+midmx = mx.loc[:,idx[:,['时间', 'Traffic_In(Mbps)', 'Traffic_Out 流量(Mbps)']]]
+#%%
+col_len = midmx.columns.size
+sf_all = midmx.iloc[:,[0,1]]
+sf_all.set_index(keys=sf_all.columns[0],inplace=True)
+sf_all.dropna(how='all',inplace=True)
+# ValueError: Shape of passed values is (7781, 8), indices imply (7778, 8)
+for coli in range(2,col_len,2):
+    colj= coli+1
+    a=midmx.iloc[:,[coli,colj]]
+    a.set_index(keys=a.columns[0],inplace=True)
+    a.dropna(how='all',inplace=True)
+    print(coli,colj)
+    sf_all = pd.concat([sf_all,a], axis=1)
+    print(sf_all.head())
+#%%
+# a.set_index(keys=a.columns[0],inplace=True)
+# b.set_index(keys=b.columns[0],inplace=True)
+# a.dropna(how='all',inplace=True)
+# b.dropna(how='all',inplace=True)
+# c = pd.concat([a,b], axis=1)
+#%%
+sf_CDN.set_index(keys='时间',inplace=True)
+
+# 场景:数据导出
+# 根据输入文件名自动生成输出文件名
+fileR = xlsx
+tNow = time.strftime("%H%M%S", time.localtime())
+fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
+
+# 单文件多表输出
+writer = ExcelWriter(fileW,engine='xlsxwriter')
+sf_CDN.to_excel(writer,sheet_name='最新数据')
+mx.to_excel(writer,sheet_name='历史数据')
+sf_all.to_excel(writer,sheet_name='历史数据2')
+writer.save()
