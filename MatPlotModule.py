@@ -227,7 +227,8 @@ sf_CDN.sort_values('Traffic_In(Mbps)',ascending=False,inplace=True)
 mx = pd.read_excel(xlsx,header=[1,2],sheet_name=0)
 mx.replace([r'^[\D]+.*'],np.nan,regex=True,inplace=True)
 #%%
-mx.dropna(how='all', axis=1, inplace=True)
+# 真实数据本身含有全为空的情况，此操作会导致真实数据被删除，导致后面concat操作失败
+# mx.dropna(how='all', axis=1, inplace=True)
 #%%
 idx = pd.IndexSlice
 midmx = mx.loc[:,idx[:,['时间', 'Traffic_In(Mbps)', 'Traffic_Out 流量(Mbps)']]]
@@ -262,7 +263,7 @@ fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
 
 # 单文件多表输出
 writer = ExcelWriter(fileW,engine='xlsxwriter')
-sf_CDN.to_excel(writer,sheet_name='最新数据')
-mx.to_excel(writer,sheet_name='历史数据')
-sf_all.to_excel(writer,sheet_name='历史数据2')
+sf_CDN.to_excel(writer,sheet_name='单个端口数据')
+midmx.to_excel(writer,sheet_name='全量端口数据')
+sf_all.to_excel(writer,sheet_name='有效数据')
 writer.save()
