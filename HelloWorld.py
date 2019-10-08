@@ -8,6 +8,8 @@ result = os.popen(cmd)
 # res = result.read()
 # print(res)
 
+# ERROR: Could not install packages due to an EnvironmentError
+# https://blog.csdn.net/a781751136/article/details/80231406
 lines = result.readlines()
 for paki in range(2,len(lines)):
     pa = lines[paki]
