@@ -247,6 +247,8 @@ for coli in range(2,col_len,2):
     sf_all = pd.concat([sf_all,a], axis=1)
     print(sf_all.head())
 #%%
+# a = midmx.iloc[:,[0,1]].head(5)
+# b = midmx.iloc[:,[2,3]].head(7)
 # a.set_index(keys=a.columns[0],inplace=True)
 # b.set_index(keys=b.columns[0],inplace=True)
 # a.dropna(how='all',inplace=True)
