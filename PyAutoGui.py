@@ -1,24 +1,31 @@
-import pyautogui, time, pyperclip, TxtOperator
 import os
-from pandas import Series, DataFrame, np, ExcelWriter
+import time
+
 import pandas as pd
+import pyautogui
+import pyperclip
+from pandas import DataFrame, ExcelWriter, Series, np
+
+import TxtOperator
 
 pyautogui.FAILSAFE = True
 pyautogui.PAUSE = 0.5
+
 
 def paste(foo):
     pyperclip.copy(foo)
     pyautogui.hotkey('ctrl', 'v')
 
-def locateCenterOnScreenWithTime(images,wait,pathdir=''):
+
+def locateCenterOnScreenWithTime(images, wait, pathdir=''):
     # time.sleep(wait)
     sl = 0.3
     # v3.0：以次数为中心；循环20次（20次机会），i意义为次数减1，i和次数不统一；不再需要add；最终时间为+最大次数*0.5
-    for i in range(0,20):
+    for i in range(0, 20):
         for im, image in enumerate(images):
             try:
-                image=os.path.join(pathdir,image)
-                x, y = pyautogui.locateCenterOnScreen(image,grayscale=True)
+                image = os.path.join(pathdir, image)
+                x, y = pyautogui.locateCenterOnScreen(image, grayscale=True)
                 return x, y, im, wait + i * sl
             except:
                 # print('Err:locateCenterOnScreen')
@@ -27,9 +34,10 @@ def locateCenterOnScreenWithTime(images,wait,pathdir=''):
     raise LookupError('Not Found')
     return -1, -1, -1, wait + 20 * sl
 
+
 screenWidth, screenHeight = pyautogui.size()
 pyautogui.moveTo(screenWidth / 2, screenHeight / 2)
-print(screenWidth,screenHeight)
+print(screenWidth, screenHeight)
 
 # currentMouseX, currentMouseY = pyautogui.position()
 # pyautogui.moveTo(100, 500)
@@ -48,12 +56,14 @@ print(screenWidth,screenHeight)
 # pyautogui.keyUp('shift')
 # pyautogui.hotkey('ctrl', 'c')
 
-num = pyautogui.prompt(text='请复制处理意见，确保IE为活动窗口，确保有一个空白记事本在身边！', title='已阅！' , default='已阅。')
+num = pyautogui.prompt(text='请复制处理意见，确保IE为活动窗口，确保有一个空白记事本在身边！',
+                       title='已阅！',
+                       default='已阅。')
 num = int(num)
 
 # 待办第一条的位置坐标，默认为第1条，如果第1条处理有问题，可通过下面变量进行调整。待办之前相差32像素。
 tempPn = 0
-pointOne = (95, 268+32*tempPn)
+pointOne = (95, 268 + 32 * tempPn)
 
 tTodo = 0.5
 tN = 0.5
@@ -72,38 +82,42 @@ sf_gui = pd.read_excel(xlsx)
 for i in range(num):
     try:
         for gi in range(sf_gui.shape[0]):
-            giop = sf_gui.iloc[gi,0]
-            gidata = sf_gui.iloc[gi,1]
-            if giop=='si':
+            giop = sf_gui.iloc[gi, 0]
+            gidata = sf_gui.iloc[gi, 1]
+            if giop == 'si':
                 imgs = gidata.split()
                 print(imgs)
                 # 查找待办列表
-                x, y, which, t = locateCenterOnScreenWithTime(imgs, tTodo, pathdir=imgsdir)
+                x, y, which, t = locateCenterOnScreenWithTime(imgs,
+                                                              tTodo,
+                                                              pathdir=imgsdir)
                 tSlist.append(t)
                 print('SI-OK')
             elif giop == 'sk':
                 imgs = gidata.split()
                 print(imgs)
                 # 查找待办列表
-                x, y, which, t = locateCenterOnScreenWithTime(imgs, tTodo, pathdir=imgsdir)
+                x, y, which, t = locateCenterOnScreenWithTime(imgs,
+                                                              tTodo,
+                                                              pathdir=imgsdir)
                 tSlist.append(t)
                 if which >= 1:
-                    which = which-1
+                    which = which - 1
                 print('SK-OK', x, y, which)
                 pyautogui.click(x, y, duration=0.5)
-            elif giop=='ck':
+            elif giop == 'ck':
                 pointStr = gidata.split()
                 points = []
-                for i in range(0,len(pointStr),2):
-                    points.append((int(pointStr[i]),int(pointStr[i+1])))
-                print('CK-OK',points[which])
+                for i in range(0, len(pointStr), 2):
+                    points.append((int(pointStr[i]), int(pointStr[i + 1])))
+                print('CK-OK', points[which])
                 pyautogui.click(points[which], duration=0.5)
             elif giop == 'cv':
                 paste(READ)
                 print('CV-OK')
             elif giop == 'ps':
                 pyautogui.press(gidata)
-                
+
     except LookupError as Lookerr:
         print('Lookerr')
         pyautogui.alert(text='LookupError', title='Error', button='OK')
