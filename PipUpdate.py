@@ -9,18 +9,20 @@
 #     call("pip install --upgrade " + dist.project_name, shell=True)
 
 import os
+
 #%% 功能测试
 # 执行DOS命令
-upcm = 'ping www.baidu.com'
+upcm = 'pip list --outdated'
 result = os.popen(upcm)
 res = result.read()
 print(res)
-res = result.readlines()
-print(res)
+# res = result.readlines()
+# print(res
 
 # 从pip list --outdated命令结果中提取库名
 packinfo = 'pandas     0.25.0  0.25.1 wheel'
 packinfo = packinfo[0:packinfo.find(' ')]
+print(packinfo)
 #%%
 # ERROR: Could not install packages due to an EnvironmentError
 # https://blog.csdn.net/a781751136/article/details/80231406
@@ -28,9 +30,11 @@ packinfo = packinfo[0:packinfo.find(' ')]
 cmd = 'pip list --outdated'
 result = os.popen(cmd)
 lines = result.readlines()
+print(lines)
+size_l = len(lines)
 
-# for packi in range(2,len(lines)):
-for packi in range(2, 5):
+for packi in range(2, size_l):
+    print('%s/%s' % (packi, size_l))
     packinfo = lines[packi]
     packinfo = packinfo.split()
     # print(packinfo)
@@ -39,3 +43,5 @@ for packi in range(2, 5):
 
     print(pipupc)
     os.system(pipupc)
+
+os.system(cmd)
