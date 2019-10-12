@@ -24,6 +24,7 @@ def locateCenterOnScreenWithTime(images,wait,pathdir=''):
                 # print('Err:locateCenterOnScreen')
                 continue
         time.sleep(sl)
+    raise LookupError('Not Found')
     return -1, -1, -1, wait + 20 * sl
 
 screenWidth, screenHeight = pyautogui.size()
@@ -69,41 +70,47 @@ xlsx = r'F:\个人文件夹\ProJects\LearnCharmPro\Inputs\PyAutoGui.xlsx'
 sf_gui = pd.read_excel(xlsx)
 # print(sf_gui.shape)
 for i in range(num):
-    for gi in range(sf_gui.shape[0]):
-        giop = sf_gui.iloc[gi,0]
-        gidata = sf_gui.iloc[gi,1]
-        if giop=='si':
-            imgs = gidata.split()
-            print(imgs)
-            # 查找待办列表
-            x, y, which, t = locateCenterOnScreenWithTime(imgs, tTodo, pathdir=imgsdir)
-            tSlist.append(t)
-            print('SI-OK')
-        elif giop == 'sk':
-            imgs = gidata.split()
-            print(imgs)
-            # 查找待办列表
-            x, y, which, t = locateCenterOnScreenWithTime(imgs, tTodo, pathdir=imgsdir)
-            tSlist.append(t)
-            if which >= 1:
-                which = which-1
-            print('SK-OK', x, y, which)
-            pyautogui.click(x, y, duration=0.5)
-        elif giop=='ck':
-            pointStr = gidata.split()
-            points = []
-            for i in range(0,len(pointStr),2):
-                points.append((int(pointStr[i]),int(pointStr[i+1])))
-            print('CK-OK',points[which])
-            pyautogui.click(points[which], duration=0.5)
-        elif giop == 'cv':
-            paste(READ)
-            print('CV-OK')
-        elif giop == 'ps':
-            pyautogui.press(gidata)
-
-    timeList = 'tTodo=%.2f,tN=%.2f,tUp=%.2f,tUpJt=%.2f' % tuple(tSlist)
-    print(timeList)
+    try:
+        for gi in range(sf_gui.shape[0]):
+            giop = sf_gui.iloc[gi,0]
+            gidata = sf_gui.iloc[gi,1]
+            if giop=='si':
+                imgs = gidata.split()
+                print(imgs)
+                # 查找待办列表
+                x, y, which, t = locateCenterOnScreenWithTime(imgs, tTodo, pathdir=imgsdir)
+                tSlist.append(t)
+                print('SI-OK')
+            elif giop == 'sk':
+                imgs = gidata.split()
+                print(imgs)
+                # 查找待办列表
+                x, y, which, t = locateCenterOnScreenWithTime(imgs, tTodo, pathdir=imgsdir)
+                tSlist.append(t)
+                if which >= 1:
+                    which = which-1
+                print('SK-OK', x, y, which)
+                pyautogui.click(x, y, duration=0.5)
+            elif giop=='ck':
+                pointStr = gidata.split()
+                points = []
+                for i in range(0,len(pointStr),2):
+                    points.append((int(pointStr[i]),int(pointStr[i+1])))
+                print('CK-OK',points[which])
+                pyautogui.click(points[which], duration=0.5)
+            elif giop == 'cv':
+                paste(READ)
+                print('CV-OK')
+            elif giop == 'ps':
+                pyautogui.press(gidata)
+                
+    except LookupError as Lookerr:
+        print('Lookerr')
+        pyautogui.alert(text='LookupError', title='Error', button='OK')
+        break
+    else:
+        timeList = 'tTodo=%.2f,tN=%.2f,tUp=%.2f,tUpJt=%.2f' % tuple(tSlist)
+        print(timeList)
     # writeFile = 'Outputs\PyAutoGui.txt'
     # TxtOperator.writeList2Txt(writeFile, [timeList], 'a')
 
