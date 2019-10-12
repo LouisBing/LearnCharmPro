@@ -1,8 +1,8 @@
 {
     "editor.fontSize": 16,
     "python.linting.enabled": true,
-    "python.linting.flake8Enabled": false,
-    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.pylintEnabled": false,
     "python.autoComplete.addBrackets": true,
     "python.jediEnabled": false,
     "python.linting.pylintArgs": [
