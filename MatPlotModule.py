@@ -234,11 +234,12 @@ idx = pd.IndexSlice
 midmx = mx.loc[:,idx[:,['时间', 'Traffic_In(Mbps)', 'Traffic_Out 流量(Mbps)']]]
 #%%
 col_len = midmx.columns.size
-sf_all = midmx.iloc[:,[0,1]]
-sf_all.set_index(keys=sf_all.columns[0],inplace=True)
-sf_all.dropna(how='all',inplace=True)
+sf_all = pd.DataFrame()
+# sf_all = midmx.iloc[:,[0,1]]
+# sf_all.set_index(keys=sf_all.columns[0],inplace=True)
+# sf_all.dropna(how='all',inplace=True)
 # ValueError: Shape of passed values is (7781, 8), indices imply (7778, 8)
-for coli in range(2,col_len,2):
+for coli in range(0,col_len,2):
     colj= coli+1
     a=midmx.iloc[:,[coli,colj]]
     a.set_index(keys=a.columns[0],inplace=True)
@@ -255,8 +256,38 @@ for coli in range(2,col_len,2):
 # b.dropna(how='all',inplace=True)
 # c = pd.concat([a,b], axis=1)
 #%%
-sf_CDN.set_index(keys='时间',inplace=True)
+sf_CDN = sf_all.groupby(level=1,axis=1).sum()
+n95 = int(sf_CDN.shape[0]*0.05)+1
+sf_CDN.sort_values('Traffic_In(Mbps)',ascending=False,inplace=True)
+sf_CDN['日期']=sf_CDN.index.map(lambda x:x.split()[0])
+sf_CDN['95']='IN'
+sf_CDN.iloc[:n95,-1]='OUT'
+sf_CDN.iloc[n95,-1]='OK'
 
+# sf_CDN.index.name='时间粒度'
+sf_CDN.sort_index(inplace=True)
+# sf_CDN.reset_index(inplace=True)
+
+plt.plot('Traffic_In(Mbps)', data=sf_CDN[::12],color="blue",label="L-OK")
+# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OUT'][::12],color="red",label="S-OUT",linewidths=0.0001)
+# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OK'][::12],color="blue",label="S-OK",linewidths=0.0001)
+# plt.plot('NO', 'Traffic_In(Mbps)', data=sf_CDN[::12],color="blue",label="L-OK")
+# x = [sf_CDN.iloc[0,0],sf_CDN.iloc[-1,0]]
+# y = sf_CDN.loc[sf_CDN['95']=='OK','Traffic_In(Mbps)']
+# y = [y.iloc[0],y.iloc[0]]
+# plt.plot(x,y,label='95',color="red")
+# # plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='IN'][::12],color='green',label="IN",linewidths=0.0001)
+# # plt.gca().set(xlim=(20190101000000, 20190201000000), ylim=(0, 90000000), xlabel='Area', ylabel='Population')
+
+
+xloc_date = sf_CDN.loc[:, '日期']
+xloc_date.drop_duplicates(inplace=True)
+
+# plt.xticks(ticks=xloc_date.index,labels=xloc_date.to_list(),rotation=30)
+
+# plt.legend()
+plt.show()
+#%%
 # 场景:数据导出
 # 根据输入文件名自动生成输出文件名
 fileR = xlsx
@@ -268,4 +299,5 @@ writer = pd.ExcelWriter(fileW,engine='xlsxwriter')
 sf_CDN.to_excel(writer,sheet_name='单个端口数据')
 midmx.to_excel(writer,sheet_name='全量端口数据')
 sf_all.to_excel(writer,sheet_name='有效数据')
+sf_CDN.to_excel(writer,sheet_name='SUM')
 writer.save()
