@@ -1,13 +1,13 @@
 #-*-coding:utf-8-*-
 #%%
 import time
-import numpy as np
-import pandas as pd
-from pandas import DataFrame, ExcelWriter, Series, np
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
-import warnings; warnings.filterwarnings(action='once')
+
 # ------------------------------------------------------------------------------------------
 # # 官方事例
 # # fig = plt.figure()  # an empty figure with no axes
@@ -264,7 +264,7 @@ tNow = time.strftime("%H%M%S", time.localtime())
 fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
 
 # 单文件多表输出
-writer = ExcelWriter(fileW,engine='xlsxwriter')
+writer = pd.ExcelWriter(fileW,engine='xlsxwriter')
 sf_CDN.to_excel(writer,sheet_name='单个端口数据')
 midmx.to_excel(writer,sheet_name='全量端口数据')
 sf_all.to_excel(writer,sheet_name='有效数据')

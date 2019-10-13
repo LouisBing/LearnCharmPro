@@ -6,8 +6,8 @@ import shutil
 import time
 from io import StringIO
 
+import numpy as np
 import pandas as pd
-from pandas import DataFrame, ExcelWriter, Series, np
 
 import FileOperator
 import TxtOperator
@@ -85,7 +85,7 @@ if SCENE == 0:
     # 数据清洗-填充空值
     sfall[1].fillna(method='pad',inplace=True)
     # 数据清洗-函数级应用:单元格处理，删除单元格空格
-    sfall.loc[:,1]  = sfall.loc[:,1].map(str.strip,na_action='ignore')
+    sfall.loc[:,1] = sfall.loc[:,1].map(str.strip,na_action='ignore')
     # sfall.sort_values(by=['更新时间',0],inplace=True,ascending=False)
 
 
@@ -147,7 +147,7 @@ if SCENE == 0:
         df.rename(columns=title, inplace=True)
 
     # 已知导出文件名,单文件多表输出
-    writer = ExcelWriter(outfile_xls,engine='xlsxwriter')
+    writer = pd.ExcelWriter(outfile_xls,engine='xlsxwriter')
     sf_new.to_excel(writer,sheet_name='最新数据')
     sf_history.to_excel(writer,sheet_name='历史数据')
     sf_Header.to_excel(writer,sheet_name='表头汇总')
@@ -230,7 +230,7 @@ elif SCENE == 2:
     tNow = time.strftime("%H%M%S", time.localtime())
     fileW = header_file[:header_file.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
     # 单文件多表输出
-    writer = ExcelWriter(fileW,engine='xlsxwriter')
+    writer = pd.ExcelWriter(fileW,engine='xlsxwriter')
     sidf_header1.to_excel(writer,sheet_name='表头1')
     sidf_header2.to_excel(writer,sheet_name='表头2')
     sidf_header3.to_excel(writer,sheet_name='表头3')
@@ -258,7 +258,7 @@ elif SCENE == 3:
     fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
 
     # 单文件多表输出
-    writer = ExcelWriter(fileW,engine='xlsxwriter')
+    writer = pd.ExcelWriter(fileW,engine='xlsxwriter')
     pivotable_df.to_excel(writer,sheet_name='数据透视')
     group_df.to_excel(writer,sheet_name='数据分组')
     sort_df.to_excel(writer,sheet_name='数据排序')
