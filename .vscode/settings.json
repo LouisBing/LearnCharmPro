@@ -3,7 +3,7 @@
     "python.linting.enabled": true,
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
-    "python.jediEnabled": true,
+    "python.jediEnabled": false,
     "python.autoComplete.addBrackets": true,
     "python.formatting.provider": "yapf",
     "python.linting.pylintArgs": [
@@ -15,7 +15,9 @@
     "python.pythonPath": "C:\\Program Files\\Python\\Python36\\python.exe",
     "python.autoComplete.extraPaths": [
         "C:/Program Files/Python/Python36/Lib/site-packages/pandas",
-        "C:/Program Files/Python/Python36/Lib/site-packages"
+        "C:/Program Files/Python/Python36/Lib/site-packages",
+        "C:\\Program Files\\Python\\Python36\\Lib\\site-packages",
+        "C:\\Program Files\\Python\\Python36\\Lib\\site-packages\\pandas",
     ],
     "editor.quickSuggestions": {
         "other": true,
