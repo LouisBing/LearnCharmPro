@@ -3,8 +3,9 @@
     "python.linting.enabled": true,
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
+    "python.jediEnabled": true,
     "python.autoComplete.addBrackets": true,
-    "python.jediEnabled": false,
+    "python.formatting.provider": "yapf",
     "python.linting.pylintArgs": [
         "--disable=all",
         // "--enable=F,E,unreachable,duplicate-key,unnecessary-semicolon,global-variable-not-assigned,unused-variable,binary-op-exception,bad-format-string,anomalous-backslash-in-string,bad-open-mode",
@@ -12,16 +13,21 @@
         "--disable=abstract-class-instantiated"
     ],
     "python.pythonPath": "C:\\Program Files\\Python\\Python36\\python.exe",
-    "python.autoComplete.extraPaths": ["C:\\Program Files\\Python\\Python36\\Lib\\site-packages\\pandas"],
+    "python.autoComplete.extraPaths": [
+        "C:/Program Files/Python/Python36/Lib/site-packages/pandas",
+        "C:/Program Files/Python/Python36/Lib/site-packages"
+    ],
     "editor.quickSuggestions": {
         "other": true,
         "comments": true,
         "strings": true
     },
-    "editor.tabCompletion": "off",
+    "editor.acceptSuggestionOnEnter": "smart",
     "editor.quickSuggestionsDelay": 5,
-    "editor.parameterHints.enabled": true,
+    "editor.suggestOnTriggerCharacters": true,
+    "editor.tabCompletion": "on",
     "editor.suggest.localityBonus": true,
+    "editor.suggestSelection": "recentlyUsed",
     "editor.wordBasedSuggestions": true,
-    "python.formatting.provider": "yapf"
+    "editor.parameterHints.enabled": true
 }
