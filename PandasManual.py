@@ -1,3 +1,11 @@
+#%%
+import pandas as pd
+#%%
+xlsx = r'F:\个人文件夹\ProJects\LearnCharmPro\Inputs\【PandasTest】变量导入.xlsx'
+adf:pd.DataFrame = pd.read_excel(xlsx, header=0, sheet_name=0, index_col=0)
+bdf:pd.DataFrame = pd.read_excel(xlsx, header=0, sheet_name=1, index_col=0)
+cdf = pd.concat([adf, bdf], axis=1)
+#%%
 # # 数据导入
 # sf = pd.read_excel(file, sheet_name=0, header=None, skiprows=range(headerrows))
 # sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
