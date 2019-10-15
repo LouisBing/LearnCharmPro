@@ -199,31 +199,6 @@ sf_CDN = pd.read_excel(xlsx,header=2,sheet_name=1)
 n95 = int(sf_CDN.shape[0]*0.05)+1
 sf_CDN.sort_values('Traffic_In(Mbps)',ascending=False,inplace=True)
 #%%
-# sf_CDN['95']='IN'
-# sf_CDN.iloc[:n95,3]='OUT'
-# sf_CDN.iloc[n95,3]='OK'
-
-# sf_CDN.sort_values('时间',inplace=True)
-# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OUT'][::12],color="red",label="S-OUT",linewidths=0.0001)
-# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OK'][::12],color="blue",label="S-OK",linewidths=0.0001)
-# plt.plot('NO', 'Traffic_In(Mbps)', data=sf_CDN[::12],color="blue",label="L-OK")
-# x = [sf_CDN.iloc[0,0],sf_CDN.iloc[-1,0]]
-# y = sf_CDN.loc[sf_CDN['95']=='OK','Traffic_In(Mbps)']
-# y = [y.iloc[0],y.iloc[0]]
-# plt.plot(x,y,label='95',color="red")
-# # plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='IN'][::12],color='green',label="IN",linewidths=0.0001)
-# # plt.gca().set(xlim=(20190101000000, 20190201000000), ylim=(0, 90000000), xlabel='Area', ylabel='Population')
-
-
-# xloc_date = sf_CDN.loc[:, '时间']
-# xloc_date = xloc_date.apply(lambda x:x.split()[0])
-# xloc_date.drop_duplicates(inplace=True)
-
-# plt.xticks(ticks=xloc_date.index.to_list(),labels=xloc_date.to_list(),rotation=30)
-
-# plt.legend()
-# plt.show()
-#%%
 mx = pd.read_excel(xlsx,header=[1,2],sheet_name=0)
 mx.replace([r'^[\D]+.*'],np.nan,regex=True,inplace=True)
 #%%
@@ -244,10 +219,10 @@ for coli in range(0,col_len,2):
     a=midmx.iloc[:,[coli,colj]]
     a.set_index(keys=a.columns[0],inplace=True)
     a.dropna(how='all',inplace=True)
-    print(coli,colj)
+    # print(coli,colj)
     sf_all = pd.concat([sf_all,a], axis=1)
-    print(sf_all.head())
-#%%
+    # print(sf_all.head())
+#%% 代码测试
 # a = midmx.iloc[:,[0,1]].head(5)
 # b = midmx.iloc[:,[2,3]].head(7)
 # a.set_index(keys=a.columns[0],inplace=True)
@@ -257,6 +232,7 @@ for coli in range(0,col_len,2):
 # c = pd.concat([a,b], axis=1)
 #%%
 sf_CDN = sf_all.groupby(level=1,axis=1).sum()
+
 n95 = int(sf_CDN.shape[0]*0.05)+1
 sf_CDN.sort_values('Traffic_In(Mbps)',ascending=False,inplace=True)
 sf_CDN['日期']=sf_CDN.index.map(lambda x:x.split()[0])
@@ -264,28 +240,47 @@ sf_CDN['95']='IN'
 sf_CDN.iloc[:n95,-1]='OUT'
 sf_CDN.iloc[n95,-1]='OK'
 
-# sf_CDN.index.name='时间粒度'
 sf_CDN.sort_index(inplace=True)
-# sf_CDN.reset_index(inplace=True)
-
-plt.plot('Traffic_In(Mbps)', data=sf_CDN[::12],color="blue",label="L-OK")
-# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OUT'][::12],color="red",label="S-OUT",linewidths=0.0001)
-# plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OK'][::12],color="blue",label="S-OK",linewidths=0.0001)
-# plt.plot('NO', 'Traffic_In(Mbps)', data=sf_CDN[::12],color="blue",label="L-OK")
-# x = [sf_CDN.iloc[0,0],sf_CDN.iloc[-1,0]]
-# y = sf_CDN.loc[sf_CDN['95']=='OK','Traffic_In(Mbps)']
-# y = [y.iloc[0],y.iloc[0]]
-# plt.plot(x,y,label='95',color="red")
-# # plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='IN'][::12],color='green',label="IN",linewidths=0.0001)
-# # plt.gca().set(xlim=(20190101000000, 20190201000000), ylim=(0, 90000000), xlabel='Area', ylabel='Population')
-
-
-xloc_date = sf_CDN.loc[:, '日期']
+#%% matplotlib不使用data参数
+# X轴为时间点，字符串类型，plot不会自动排序，除非字符串相同，否则向后插入
+step = 12
+plot_data = sf_CDN.iloc[::step,:]
+out_data = plot_data[plot_data['95']=='OUT']
+xloc_date = plot_data.loc[:,'日期']
 xloc_date.drop_duplicates(inplace=True)
 
-# plt.xticks(ticks=xloc_date.index,labels=xloc_date.to_list(),rotation=30)
+plt.plot(plot_data.index, plot_data['Traffic_In(Mbps)'],color="blue",label="L-OK")
+plt.scatter(out_data.index, out_data['Traffic_In(Mbps)'],color="red",label="S-OUT",linewidths=0.0001)
+plt.xticks(ticks=xloc_date.index,labels=xloc_date,rotation=30)
 
-# plt.legend()
+x = [plot_data.index[0],plot_data.index[-1]]
+y = sf_CDN.loc[sf_CDN['95']=='OK','Traffic_In(Mbps)']
+y = [y.iloc[0],y.iloc[0]]
+plt.plot(x,y,label='95',color="red")
+
+plt.legend()
+plt.show()
+#%% matplotlib使用data参数
+# X轴使用数值类型，plot会自动排序
+step = 12
+sf_CDN.index.name='时间点'
+sf_CDN.reset_index(inplace=True)
+sf_CDN.index.name='NO'
+sf_CDN.reset_index(inplace=True)
+
+plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OUT'][::step],color="red",label="S-OUT",linewidths=0.0001)
+plt.scatter('NO', 'Traffic_In(Mbps)', data=sf_CDN[sf_CDN['95']=='OK'][::step],color="blue",label="S-OK",linewidths=0.0001)
+plt.plot('NO', 'Traffic_In(Mbps)', data=sf_CDN[::step],color="blue",label="L-OK")
+x = [sf_CDN.iloc[0,0],sf_CDN.iloc[-1,0]]
+y = sf_CDN.loc[sf_CDN['95']=='OK','Traffic_In(Mbps)']
+y = [y.iloc[0],y.iloc[0]]
+plt.plot(x,y,label='95',color="red")
+
+xloc_date:pd.DataFrame = sf_CDN.loc[:,['NO', '日期']]
+xloc_date.drop_duplicates(subset='日期', inplace=True)
+plt.xticks(ticks=xloc_date['NO'],labels=xloc_date['日期'],rotation=30)
+
+plt.legend()
 plt.show()
 #%%
 # 场景:数据导出
@@ -296,8 +291,7 @@ fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
 
 # 单文件多表输出
 writer = pd.ExcelWriter(fileW,engine='xlsxwriter')
-sf_CDN.to_excel(writer,sheet_name='单个端口数据')
 midmx.to_excel(writer,sheet_name='全量端口数据')
 sf_all.to_excel(writer,sheet_name='有效数据')
-sf_CDN.to_excel(writer,sheet_name='SUM')
+sf_CDN.to_excel(writer,sheet_name='汇总统计数据')
 writer.save()
