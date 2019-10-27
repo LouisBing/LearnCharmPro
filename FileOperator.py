@@ -4,9 +4,10 @@ import glob
 import shutil
 import re
 
+
 #获得目录下的所有文件夹和文件列表
 #返回文件列表
-def getAllFiles(rootDir, notDeeep = False):
+def getAllFiles(rootDir, notDeeep=False):
     filelist = []
     dirlist = []
     rwalk = os.walk(rootDir)
@@ -26,12 +27,13 @@ def getAllFiles(rootDir, notDeeep = False):
     #     print fileItr, os.path.isfile(fileItr)
     return filelist
 
-def getNewstFile(forder,fileMath='None'):
+
+def getNewstFile(forder, fileMath='None'):
     fileList = getAllFiles(forder)
     mt = 0
     reFile = u''
     for fi in fileList:
-        if fileMath != u'None' and fi.find(fileMath)==-1:
+        if fileMath != u'None' and fi.find(fileMath) == -1:
             continue
         mtfi = os.path.getmtime(fi)
         if mtfi > mt:
@@ -39,6 +41,7 @@ def getNewstFile(forder,fileMath='None'):
             reFile = fi
 
     return reFile
+
 
 def get_file_list(file_path):
     dir_list = os.listdir(file_path)
@@ -48,26 +51,33 @@ def get_file_list(file_path):
         # 注意，这里使用lambda表达式，将文件按照最后修改时间顺序升序排列
         # os.path.getmtime() 函数是获取文件最后修改时间
         # os.path.getctime() 函数是获取文件最后创建时间
-        dir_list = sorted(dir_list,  key=lambda x: os.path.getmtime(os.path.join(file_path, x)),reverse=True)
+        dir_list = sorted(dir_list, key=lambda x: os.path.getmtime(os.path.join(file_path, x)), reverse=True)
         # print(dir_list)
         return dir_list
 
+
 def rename():
     i = 0
-    path = "F:\test";
+    path = "F:\test"
     filelist = os.listdir(path)  # 该文件夹下所有的文件（包括文件夹）
     for files in filelist:  # 遍历所有文件
         i = i + 1
-        Olddir = os.path.join(path, files);  # 原来的文件路径
+        Olddir = os.path.join(path, files)
+        # 原来的文件路径
         if os.path.isdir(Olddir):  # 如果是文件夹则跳过
-            continue;
-        filename = os.path.splitext(files)[0];  # 文件名
-        filetype = os.path.splitext(files)[1];  # 文件扩展名
-        Newdir = os.path.join(path, str(i) + filetype);  # 新的文件路径
+            continue
+        filename = os.path.splitext(files)[0]
+        # 文件名
+        filetype = os.path.splitext(files)[1]
+        # 文件扩展名
+        Newdir = os.path.join(path,
+                              str(i) + filetype)
+        # 新的文件路径
         os.rename(Olddir, Newdir)  # 重命名
 
+
 if __name__ == '__main__':
-# ------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------
     ###系统函数功能测试###
     folder = r'Inputs'
     # 只能列出当前目录下的文件和文件夹，文件夹下面的文件无法遍历
@@ -90,8 +100,8 @@ if __name__ == '__main__':
         for filename in filenames:
             print(' File', filename)
 # ------------------------------------------------------------------------------------------
-    # 测试getAllFiles
-    rootFolder =  r'Inputs'
+# 测试getAllFiles
+    rootFolder = r'Inputs'
     l = getAllFiles(rootFolder)
     print(u'getAllFiles')
     for dirItr in l:
