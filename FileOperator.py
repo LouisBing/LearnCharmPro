@@ -66,12 +66,11 @@ def rename():
         # 原来的文件路径
         if os.path.isdir(Olddir):  # 如果是文件夹则跳过
             continue
-        filename = os.path.splitext(files)[0]
+        # filename = os.path.splitext(files)[0]
         # 文件名
         filetype = os.path.splitext(files)[1]
         # 文件扩展名
-        Newdir = os.path.join(path,
-                              str(i) + filetype)
+        Newdir = os.path.join(path, str(i) + filetype)
         # 新的文件路径
         os.rename(Olddir, Newdir)  # 重命名
 
@@ -79,7 +78,11 @@ def rename():
 if __name__ == '__main__':
     # ------------------------------------------------------------------------------------------
     ###系统函数功能测试###
-    folder = r'Inputs'
+    folder = os.path.abspath(r'..\..')
+    folder = os.path.join(folder, 'Inputs', 'LearnCharmPro')
+    print(folder)
+
+
     # 只能列出当前目录下的文件和文件夹，文件夹下面的文件无法遍历
     for file in os.listdir(folder):
         print(file)
@@ -101,24 +104,24 @@ if __name__ == '__main__':
             print(' File', filename)
 # ------------------------------------------------------------------------------------------
 # 测试getAllFiles
-    rootFolder = r'Inputs'
-    l = getAllFiles(rootFolder)
+    rootFolder = folder
+    fileList = getAllFiles(rootFolder)
     print(u'getAllFiles')
-    for dirItr in l:
+    for dirItr in fileList:
         print(dirItr, os.path.isfile(dirItr))
 
     # 测试
     forlderMatch = re.compile(r'附件一', re.M)
-    rootFolder = r'Inputs'
+    rootFolder = folder
     forldList = os.listdir(rootFolder)
-    for folder in forldList:
+    for folderi in forldList:
         # forlderMatch = re.compile(r'数据中心', re.M)
-        isF_Match = forlderMatch.search(folder)
+        isF_Match = forlderMatch.search(folderi)
         if isF_Match:
-            folder = os.path.join(rootFolder, folder)
-            fileNst = getNewstFile(folder)
+            folderi = os.path.join(rootFolder, folderi)
+            fileNst = getNewstFile(folderi)
             print(u'Match:', fileNst)
         else:
-            folder = os.path.join(rootFolder, folder)
-            fileNst = getNewstFile(folder)
+            folderi = os.path.join(rootFolder, folderi)
+            fileNst = getNewstFile(folderi)
             print(u'NotMatch:', fileNst)
