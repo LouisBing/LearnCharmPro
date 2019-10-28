@@ -1,7 +1,12 @@
 #%%
+import os
 import pandas as pd
 #%%
-xlsx = r'F:\个人文件夹\ProJects\LearnCharmPro\Inputs\【PandasTest】变量导入.xlsx'
+
+inputFolder = os.path.abspath(r'..\..')
+inputFolder = os.path.join(inputFolder, 'Inputs', 'LearnCharmPro')
+xlsx = os.path.join(inputFolder, '【PandasTest】变量导入.xlsx')
+
 adf:pd.DataFrame = pd.read_excel(xlsx, header=0, sheet_name=0, index_col=0)
 bdf:pd.DataFrame = pd.read_excel(xlsx, header=0, sheet_name=1, index_col=0)
 cdf = pd.concat([adf, bdf], axis=1)
@@ -79,9 +84,4 @@ cdf = pd.concat([adf, bdf], axis=1)
 # writer = ExcelWriter(fileW,engine='xlsxwriter')
 # sf_new.to_excel(writer,sheet_name='最新数据')
 # sf_history.to_excel(writer,sheet_name='历史数据')
-# sf_Header.to_excel(writer,sheet_name='表头汇总')
-# sf_error.to_excel(writer,sheet_name='异常文件')
-# midsf.to_excel(writer,sheet_name='中间表')
-# sf_pivtable.to_excel(writer, sheet_name='透视')
-# sf_sort.to_excel(writer, sheet_name='排序')
 # writer.save()
