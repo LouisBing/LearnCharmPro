@@ -12,17 +12,18 @@ import os
 
 #%% 功能测试
 # 执行DOS命令
-upcm = 'pip list --outdated'
+upcm = 'python -m pip install --upgrade pip'
+# upcm = 'ping www.baidu.com'
+print(upcm)
+
 result = os.popen(upcm)
-res = result.read()
-print(res)
-# res = result.readlines()
-# print(res
+result = result.read()
+print(result)
 
 # 从pip list --outdated命令结果中提取库名
-packinfo = 'pandas     0.25.0  0.25.1 wheel'
-packinfo = packinfo[0:packinfo.find(' ')]
-print(packinfo)
+# packinfo = 'pandas     0.25.0  0.25.1 wheel'
+# packinfo = packinfo[0:packinfo.find(' ')]
+# print(packinfo)
 #%%
 # ERROR: Could not install packages due to an EnvironmentError
 # https://blog.csdn.net/a781751136/article/details/80231406
@@ -30,11 +31,12 @@ print(packinfo)
 cmd = 'pip list --outdated'
 result = os.popen(cmd)
 lines = result.readlines()
-print(lines)
-size_l = len(lines)
+for resline_i in lines:
+    print(resline_i)
 
+size_l = len(lines)
 for packi in range(2, size_l):
-    print('%s/%s' % (packi, size_l))
+    print('%s/%s' % (packi, size_l-1))
     packinfo = lines[packi]
     packinfo = packinfo.split()
     # print(packinfo)
