@@ -27,56 +27,66 @@ folder = inputsList[3]
 # 全局表头文件，用于替换表头。如果哪个场景需要替换表头，可以使用此表数据
 sidf_header = pd.read_excel(header_file, sheet_name=3, header=0, index_col=0)
 #%%
+outfile_xls = folder + '\\' + folder[folder.rfind('\\') + 1:] + '_PANDAS汇总_' + '.xlsx'
+# 如果汇总文件已存在，直接删除
+isx = os.path.exists(outfile_xls)
 
-# 获取目录下所有文件名
+# 获取目录下所有文件名，并汇总xls文件
+xlslist = []
 fileList = FileOperator.getAllFiles(folder, notDeeep=True)
 print(len(fileList))
-
-# 数据保量相关变量
-exlist = []
-# 设置表头行数
-headerrows = 1
-headerlist = []
-oldexlist = []
-
-# 数据导入-依次读取每个Excel文件并进行连接
 for file in fileList:
     if ('.xls' in file) and ('~$' not in file):
         print(file)
+        xlslist.append(file)
+iscon = len(xlslist)
+
+boss_df = pd.DataFrame()
+pivotable_df = pd.DataFrame()
+if(isx == False or iscon>1):
+    print('需要合并和重新生成')
+    # 数据保量相关变量
+    exlist = []
+    # 设置表头行数
+    headerrows = 1
+    headerlist = []
+
+    # 数据导入-依次读取每个Excel文件并进行连接
+    for file in xlslist:
         sf = pd.read_excel(file, sheet_name=0, header=None, skiprows=range(headerrows), dtype={2: str})
         sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
         exlist.append(sf)
         headerlist.append(sfH)
 
-iscon = len(exlist)
-# 数据规整-连接
-boss_df = pd.concat(exlist, sort=False, ignore_index=True)
-sf_Header = pd.concat(headerlist, sort=False, ignore_index=True)
+    # 数据规整-连接
+    boss_df = pd.concat(exlist, sort=False, ignore_index=True)
+    sf_Header = pd.concat(headerlist, sort=False, ignore_index=True)
 
-# 替换表头
-headerindex = 5
-title = sidf_header.loc[headerindex, :]
-title.dropna(inplace=True)
-print(title)
-boss_df.rename(columns=title, inplace=True)
-
-# boss_df = pd.read_excel(read_file, sheet_name=0)
-code_time = pd.read_excel(code_file, sheet_name=0, dtype={'time': str})
-code_province = pd.read_excel(code_file, sheet_name=1)
-
-print(boss_df.info())
+    # 替换表头
+    headerindex = 5
+    title = sidf_header.loc[headerindex, :]
+    title.dropna(inplace=True)
+    print(title)
+    boss_df.rename(columns=title, inplace=True)
+    print(boss_df.info())
+    pivotable_df = boss_df.pivot_table(index=['product_id', 'begin_time'], values=['flow'], aggfunc=['sum', 'count'])
+elif(isx==True and iscon==1) :
+    print('直接读取汇总透视')
+    pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0,1],index_col=[0,1])
 
 #%%
 # boss_df['DT'] = boss_df['begin_time'].apply(str)
 # boss_df['date'] = boss_df['DT'].str.slice(0,8)
 # boss_df['time'] = boss_df['DT'].str.slice(8,)
 
-pivotable_df = boss_df.pivot_table(index=['product_id', 'begin_time'], values=['flow'], aggfunc=['sum', 'count'])
+# pivotable_df = boss_df.pivot_table(index=['product_id', 'begin_time'], values=['flow'], aggfunc=['sum', 'count'])
 # le0 = pivotable_df.index.get_level_values(0)
 # le0 = le0.drop_duplicates()
 product_ids = pivotable_df.index.levels[0]
 
 # 时间刻度间隔，单位小时
+code_time = pd.read_excel(code_file, sheet_name=0, dtype={'time': str})
+code_province = pd.read_excel(code_file, sheet_name=1)
 timestep = 6
 step = int(timestep * 60 / 5)
 code_time.loc[::step, 'xtick'] = 1
@@ -98,7 +108,7 @@ for id, product_id in enumerate(product_ids):
 
     # ax = plt.subplot(axlen,1,id+1)
     # ax.plot('datetime', 'flow', data=flow_df, color="red",label="S-OUT")
-    plt.plot(flow_df['begin_time'], flow_df['flow'], label=product_id)
+    plt.plot(flow_df['datetime'], flow_df['flow'], label=product_id)
 
     # ax1=plt.subplot(411)
     # ax2=plt.subplot(412)
@@ -124,11 +134,11 @@ for id, product_id in enumerate(product_ids):
 
 # xloc_date = pivotable_df['begin_time'].drop_duplicates()
 
-xloc_date = pivotable_df.index.levels[1]
+xloc_date = pivotable_df.index.levels[1].astype(str)
 xloc_date = xloc_date[::step]
 # plt.xticks(ticks=xloc_date['datetime'],rotation=45)
 
-plt.xticks(ticks=xloc_date, rotation=45)
+plt.xticks(ticks=xloc_date, rotation=40)
 
 plt.legend()
 plt.show()
@@ -139,9 +149,6 @@ plt.show()
 # tNow = time.strftime("%H%M%S", time.localtime())
 # fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
 
-outfile_xls = folder + '\\' + folder[folder.rfind('\\') + 1:] + '_PANDAS汇总_' + '.xlsx'
-# 如果汇总文件已存在，直接删除
-isx = os.path.exists(outfile_xls)
 if (isx and iscon > 1):
     print('DelExistFile:', outfile_xls)
     os.remove(outfile_xls)
