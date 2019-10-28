@@ -31,7 +31,7 @@ def locateCenterOnScreenWithTime(images, wait, pathdir=''):
                 # print('Err:locateCenterOnScreen')
                 continue
         time.sleep(sl)
-    raise LookupError('Not Found')
+    raise LookupError('Not Found @my LookupError')
     return -1, -1, -1, wait + 20 * sl
 
 
@@ -56,9 +56,7 @@ print(screenWidth, screenHeight)
 # pyautogui.keyUp('shift')
 # pyautogui.hotkey('ctrl', 'c')
 
-num = pyautogui.prompt(text='请复制处理意见，确保IE为活动窗口，确保有一个空白记事本在身边！',
-                       title='已阅！',
-                       default='已阅。')
+num = pyautogui.prompt(text='请复制处理意见，确保IE为活动窗口，确保有一个空白记事本在身边！', title='已阅！', default='已阅。')
 num = int(num)
 
 # 待办第一条的位置坐标，默认为第1条，如果第1条处理有问题，可通过下面变量进行调整。待办之前相差32像素。
@@ -80,6 +78,7 @@ xlsx = r'F:\个人文件夹\ProJects\LearnCharmPro\Inputs\PyAutoGui.xlsx'
 sf_gui = pd.read_excel(xlsx)
 # print(sf_gui.shape)
 for i in range(num):
+    tSlist = []
     try:
         for gi in range(sf_gui.shape[0]):
             giop = sf_gui.iloc[gi, 0]
@@ -88,18 +87,14 @@ for i in range(num):
                 imgs = gidata.split()
                 print(imgs)
                 # 查找待办列表
-                x, y, which, t = locateCenterOnScreenWithTime(imgs,
-                                                              tTodo,
-                                                              pathdir=imgsdir)
+                x, y, which, t = locateCenterOnScreenWithTime(imgs, tTodo, pathdir=imgsdir)
                 tSlist.append(t)
                 print('SI-OK')
             elif giop == 'sk':
                 imgs = gidata.split()
                 print(imgs)
                 # 查找待办列表
-                x, y, which, t = locateCenterOnScreenWithTime(imgs,
-                                                              tTodo,
-                                                              pathdir=imgsdir)
+                x, y, which, t = locateCenterOnScreenWithTime(imgs, tTodo, pathdir=imgsdir)
                 tSlist.append(t)
                 if which >= 1:
                     which = which - 1
@@ -119,12 +114,12 @@ for i in range(num):
                 pyautogui.press(gidata)
 
     except LookupError as Lookerr:
-        print('Lookerr')
+        print(Lookerr)
         pyautogui.alert(text='LookupError', title='Error', button='OK')
         break
     else:
-        timeList = 'tTodo=%.2f,tN=%.2f,tUp=%.2f,tUpJt=%.2f' % tuple(tSlist)
-        print(timeList)
+        # timeList = 'tTodo=%.2f,tN=%.2f,tUp=%.2f,tUpJt=%.2f' % tuple(tSlist)
+        print(tSlist)
     # writeFile = 'Outputs\PyAutoGui.txt'
     # TxtOperator.writeList2Txt(writeFile, [timeList], 'a')
 
