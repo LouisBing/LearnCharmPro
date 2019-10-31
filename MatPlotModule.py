@@ -1,5 +1,6 @@
 #-*-coding:utf-8-*-
 #%%
+import os
 import time
 
 import matplotlib as mpl
@@ -194,7 +195,10 @@ import seaborn as sns
 # plt.show()
 # ------------------------------------------------------------------------------------------
 #%%
-xlsx = r'Inputs\MX960-95计费(2015-02).xlsx'
+inputFolder = os.path.abspath(r'..\..')
+inputFolder = os.path.join(inputFolder, 'Inputs', 'LearnCharmPro')
+xlsx = os.path.join(inputFolder, 'MX960-95计费(2015-02).xlsx')
+
 sf_CDN = pd.read_excel(xlsx,header=2,sheet_name=1)
 n95 = int(sf_CDN.shape[0]*0.05)+1
 sf_CDN.sort_values('Traffic_In(Mbps)',ascending=False,inplace=True)
