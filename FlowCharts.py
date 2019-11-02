@@ -10,6 +10,18 @@ import matplotlib.pyplot as plt
 import FileOperator
 import TxtOperator
 
+
+#%%
+def mark_95(flow_df, sort_col, out_col):
+    n95 = ceil(flow_df.shape[0] * 0.05)
+    flow_df.sort_values(sort_col, ascending=False, inplace=True)
+    flow_df.iloc[:n95, :][out_col] = 'OUT'
+    flow_df.iloc[n95:n95 + 1, :][out_col] = 'OK'
+    # print(flow_df)
+    return flow_df
+
+
+#%%
 # ------------------------------------------------------------------------------------------
 # 场景：从TXT文件中输入变量
 inputFolder = os.path.abspath(r'..\..')
@@ -24,13 +36,17 @@ code_file = inputsList[1]
 read_file = inputsList[2]
 folder = inputsList[3]
 
+outfile_xls = folder + '\\' + folder[folder.rfind('\\') + 1:] + '_PANDAS汇总_' + '.xlsx'
+isx = os.path.exists(outfile_xls)
+# 测试期间可选择每次都删除汇总文件
+# if (isx):
+#     print('删除历史汇总文件:', outfile_xls)
+#     os.remove(outfile_xls)
+# isx = False
+
 # 全局表头文件，用于替换表头。如果哪个场景需要替换表头，可以使用此表数据
 sidf_header = pd.read_excel(header_file, sheet_name=3, header=0, index_col=0)
 #%%
-outfile_xls = folder + '\\' + folder[folder.rfind('\\') + 1:] + '_PANDAS汇总_' + '.xlsx'
-# 如果汇总文件已存在，直接删除
-isx = os.path.exists(outfile_xls)
-
 # 获取目录下所有文件名，并汇总xls文件
 xlslist = []
 fileList = FileOperator.getAllFiles(folder, notDeeep=True)
@@ -72,11 +88,14 @@ if (isx == False or iscon > 1):
     print(title.values)
     boss_df.rename(columns=title, inplace=True)
     print(boss_df.info())
+
     pivotable_df = boss_df.pivot_table(index=['product_id', 'begin_time'], values=['flow'], aggfunc=['sum', 'count'])
     pivotable_df.columns = ['flow', 'count-flow']
     pivotable_df['bandwidth-icp'] = pivotable_df['flow'] * 8 * 1024 / 300 / 1000 / 1000
     pivotable_df['bandwidth-cm'] = pivotable_df['flow'] * 8 / 300 / 1024
     pivotable_df['bandwidth-cm'] = pivotable_df['bandwidth-cm'].map(ceil)
+    pivotable_df['95'] = 'IN'
+
     pivotable_df.reset_index(inplace=True)
     pivotable_df['date'] = pivotable_df['begin_time'].str.slice(0, 8)
     pivotable_df['time'] = pivotable_df['begin_time'].str.slice(8, )
@@ -92,8 +111,13 @@ if (isx == False or iscon > 1):
 
     pivProvince_df = boss_df.pivot_table(index=['product_id', 'province'], values=['flow'], aggfunc='sum')
     pivProvince_df.reset_index(inplace=True)
-    pivProvince_df = pd.merge(pivProvince_df, code_province, how='left', on='province')
+    pivProvince_df = pd.merge(pivProvince_df, code_province, how='inner', on='province')
     pivProvince_df.sort_values(['product_id', 'flow'], ascending=False, inplace=True)
+    #%%
+    group_id = pivotable_df.groupby(['product_id'], group_keys=False)
+    pivotable_df = group_id.apply(mark_95, 'flow', '95')
+    pivotable_df.sort_index(inplace=True)
+    # print(pivotable_df)
 
     pivFlow_df = boss_df.pivot_table(index=['product_id'], values=['flow'], aggfunc='sum')
 
@@ -104,34 +128,31 @@ elif (isx == True and iscon == 1):
     print('直接读取汇总透视')
     # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0,1],index_col=[0,1])
     pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], dtype={'begin_time': str})
+    pivProvince_df = pd.read_excel(outfile_xls, sheet_name='省份透视', header=[0], index_col=[0])
 
 #%%
-# boss_df['DT'] = boss_df['begin_time'].apply(str)
-# boss_df['date'] = boss_df['DT'].str.slice(0,8)
-# boss_df['time'] = boss_df['DT'].str.slice(8,)
-
-# pivotable_df = boss_df.pivot_table(index=['product_id', 'begin_time'], values=['flow'], aggfunc=['sum', 'count'])
 # le0 = pivotable_df.index.get_level_values(0)
 # le0 = le0.drop_duplicates()
 # product_ids = pivotable_df.index.levels[0]
 product_ids = pivotable_df['product_id'].drop_duplicates()
 axlen = len(product_ids)
 
+fig, axs = plt.subplots(2, 1)
+
 for id, product_id in enumerate(product_ids):
     # idx = pd.IndexSlice
     # plot_data = pivotable_df.loc[idx[9001035304],idx['sum']]
     flow_df = pivotable_df.loc[pivotable_df['product_id'] == product_id]
-    # flow_df.reset_index(inplace=True)
-    # flow_df['datetime'] = flow_df['begin_time'].apply(str)
-    # flow_df['date'] = flow_df['datetime'].str.slice(0, 8)
-    # flow_df['time'] = flow_df['datetime'].str.slice(8, )
-    # flow_df['begin_time'] = flow_df['begin_time']-20191011000000
-
-    # flow_df = pd.merge(flow_df, code_time, how='left', on='time')
-
+    
     # ax = plt.subplot(axlen,1,id+1)
     # ax.plot('datetime', 'flow', data=flow_df, color="red",label="S-OUT")
-    plt.plot(flow_df['begin_time'], flow_df['bandwidth-cm'], label=product_id)
+    axs[0].set_title('CDN业务流量图')
+    axs[0].set_xlabel('时间')
+    axs[0].set_ylabel('流量(Mbps)')
+    axs[0].plot(flow_df['begin_time'], flow_df['bandwidth-cm'], label=product_id)
+
+    province_df = pivProvince_df[pivProvince_df['product_id'] == product_id]
+    axs[1].bar(province_df['省份'], province_df['flow'], label=product_id)
 
     # ax1=plt.subplot(411)
     # ax2=plt.subplot(412)
@@ -144,27 +165,35 @@ for id, product_id in enumerate(product_ids):
     # ax3.scatter(flow_df.index, flow_df['flow'], color="red",label="S-OUT")
     # ax4.scatter('datetime', 'flow', data=flow_df, color="red",label="S-OUT")
 
-    # xloc_date = flow_df[flow_df['xtick'].isin([0])]
-    # plt.xticks(ticks=xloc_date['datetime'],labels=xloc_date['date'],rotation=90)
-
     # x = [pivotable_df.iloc[0,0],pivotable_df.iloc[-1,0]]
     # y = pivotable_df.loc[pivotable_df['95']=='OK','Traffic_In(Mbps)']
     # y = [y.iloc[0],y.iloc[0]]
     # plt.plot(x,y,label='95',color="red")
 
-# xloc_date = flow_df[flow_df['xtick'].isin([0])]
-# plt.xticks(ticks=xloc_date['datetime'],labels=xloc_date['date'],rotation=45)
-
-# xloc_date = pivotable_df['begin_time'].drop_duplicates()
-
 # xloc_date = pivotable_df.index.levels[1].astype(str)
-xloc_date = pivotable_df['begin_time'].drop_duplicates()
-xloc_date = xloc_date[::step]
+# xloc_date = pivotable_df['begin_time'].drop_duplicates()
+# xloc_date = xloc_date[::step]
 # plt.xticks(ticks=xloc_date['datetime'],rotation=45)
+# plt.xticks(ticks=xloc_date, rotation=40)
 
-plt.xticks(ticks=xloc_date, rotation=40)
+xmajor_tick = pivotable_df[pivotable_df['xtick'] == 0]
+axs[0].set_xticks(ticks=xmajor_tick['begin_time'])
+axs[0].set_xticklabels(labels=xmajor_tick['begin_time'].str[4:8])
+# 使用isin，相当于==
+xminor_tick = pivotable_df[pivotable_df['xtick'].isin([1])]
+axs[0].set_xticks(ticks=xminor_tick['begin_time'], minor=True)
+axs[0].set_xticklabels(labels=xminor_tick['begin_time'].str[8:10], minor=True)
 
-plt.legend()
+axs[0].legend()
+axs[1].legend()
+
+# 解决无法显示中文问题
+# 步骤一（替换sans-serif字体）
+plt.rcParams['font.sans-serif'] = ['SimHei']
+# 步骤二（解决坐标轴负数的负号显示问题）
+plt.rcParams['axes.unicode_minus'] = False
+
+# plt.legend()
 plt.show()
 
 #%%
