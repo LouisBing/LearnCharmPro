@@ -144,18 +144,25 @@ fig, axs = plt.subplots(2, 1)
 for id, product_id in enumerate(product_ids):
     # idx = pd.IndexSlice
     # plot_data = pivotable_df.loc[idx[9001035304],idx['sum']]
+    flow_df = pivotable_df.loc[pivotable_df['product_id'] == product_id]
+    charge_95 = flow_df.loc[flow_df['95'] == 'OK', 'bandwidth-cm'].iloc[0]
+
     # 流量图中时间点间隔，单位：分钟
     chartStep = 60
     chartStep = int(chartStep/5)
-    flow_df = pivotable_df.loc[pivotable_df['product_id'] == product_id]
     flow_df = flow_df.iloc[::chartStep,:]
-    
+
     # ax = plt.subplot(axlen,1,id+1)
     # ax.plot('datetime', 'flow', data=flow_df, color="red",label="S-OUT")
     axs[0].set_title('CDN业务流量图')
     axs[0].set_xlabel('时间')
     axs[0].set_ylabel('流量(Mbps)')
     axs[0].plot(flow_df['begin_time'], flow_df['bandwidth-cm'], label=product_id)
+
+    x_95 = [flow_df['begin_time'].iloc[0], flow_df['begin_time'].iloc[-1]]
+    y_95 = [charge_95, charge_95]
+    print(x_95, y_95)
+    axs[0].plot(x_95, y_95, label='95', color="red", marker='.', linestyle='--')
 
     province_df = pivProvince_df[pivProvince_df['product_id'] == product_id]
     axs[1].bar(province_df['省份'], province_df['flow'], label=product_id)
@@ -170,11 +177,6 @@ for id, product_id in enumerate(product_ids):
     # ax2.plot('begin_time', 'flow', data=flow_df, color='blue', label='OK', linestyle='--')
     # ax3.scatter(flow_df.index, flow_df['flow'], color="red",label="S-OUT")
     # ax4.scatter('datetime', 'flow', data=flow_df, color="red",label="S-OUT")
-
-    # x = [pivotable_df.iloc[0,0],pivotable_df.iloc[-1,0]]
-    # y = pivotable_df.loc[pivotable_df['95']=='OK','Traffic_In(Mbps)']
-    # y = [y.iloc[0],y.iloc[0]]
-    # plt.plot(x,y,label='95',color="red")
 
 # xloc_date = pivotable_df.index.levels[1].astype(str)
 # xloc_date = pivotable_df['begin_time'].drop_duplicates()
