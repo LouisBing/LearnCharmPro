@@ -123,12 +123,14 @@ if (isx == False or iscon > 1):
 
     group_df = pivotable_df.groupby(['product_id', 'date'])
     maxDateFlow_df = group_df.apply(lambda x: x.nlargest(2, 'bandwidth-cm'))
+    print('合并和重新生成完成')
 
 elif (isx == True and iscon == 1):
     print('直接读取汇总透视')
     # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0,1],index_col=[0,1])
     pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], dtype={'begin_time': str})
     pivProvince_df = pd.read_excel(outfile_xls, sheet_name='省份透视', header=[0], index_col=[0])
+    print('直接读取完成')
 
 #%%
 # le0 = pivotable_df.index.get_level_values(0)
@@ -142,7 +144,11 @@ fig, axs = plt.subplots(2, 1)
 for id, product_id in enumerate(product_ids):
     # idx = pd.IndexSlice
     # plot_data = pivotable_df.loc[idx[9001035304],idx['sum']]
+    # 流量图中时间点间隔，单位：分钟
+    chartStep = 60
+    chartStep = int(chartStep/5)
     flow_df = pivotable_df.loc[pivotable_df['product_id'] == product_id]
+    flow_df = flow_df.iloc[::chartStep,:]
     
     # ax = plt.subplot(axlen,1,id+1)
     # ax.plot('datetime', 'flow', data=flow_df, color="red",label="S-OUT")
