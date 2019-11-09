@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 import FileOperator
 import TxtOperator
@@ -113,6 +114,7 @@ if (isx == False or iscon > 1):
     pivProvince_df.reset_index(inplace=True)
     pivProvince_df = pd.merge(pivProvince_df, code_province, how='inner', on='province')
     pivProvince_df.sort_values(['product_id', 'flow'], ascending=False, inplace=True)
+    pivProvince_df.index = range(len(pivProvince_df))
     #%%
     group_id = pivotable_df.groupby(['product_id'], group_keys=False)
     pivotable_df = group_id.apply(mark_95, 'flow', '95')
@@ -120,6 +122,13 @@ if (isx == False or iscon > 1):
     # print(pivotable_df)
 
     pivFlow_df = boss_df.pivot_table(index=['product_id'], values=['flow'], aggfunc='sum')
+    pivProvince_df = pd.merge(pivProvince_df,
+                              pivFlow_df,
+                              how='left',
+                              left_on='product_id',
+                              right_index=True,
+                              suffixes=('', '-pidsum'))
+    pivProvince_df['占比'] = pivProvince_df['flow'] / pivProvince_df['flow-pidsum']
 
     group_df = pivotable_df.groupby(['product_id', 'date'])
     maxDateFlow_df = group_df.apply(lambda x: x.nlargest(2, 'bandwidth-cm'))
@@ -130,6 +139,7 @@ elif (isx == True and iscon == 1):
     # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0,1],index_col=[0,1])
     pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], dtype={'begin_time': str})
     pivProvince_df = pd.read_excel(outfile_xls, sheet_name='省份透视', header=[0], index_col=[0])
+    pivFlow_df = pd.read_excel(outfile_xls, sheet_name='总流量透视', header=[0], index_col=[0])
     print('直接读取完成')
 
 #%%
@@ -138,6 +148,8 @@ elif (isx == True and iscon == 1):
 # product_ids = pivotable_df.index.levels[0]
 product_ids = pivotable_df['product_id'].drop_duplicates()
 axlen = len(product_ids)
+pivProvince_df = pivProvince_df[pivProvince_df['flow'] > 0]
+pivProvince_df.index = range(len(pivProvince_df))
 
 fig, axs = plt.subplots(2, 1)
 
@@ -149,8 +161,8 @@ for id, product_id in enumerate(product_ids):
 
     # 流量图中时间点间隔，单位：分钟
     chartStep = 60
-    chartStep = int(chartStep/5)
-    flow_df = flow_df.iloc[::chartStep,:]
+    chartStep = int(chartStep / 5)
+    flow_df = flow_df.iloc[::chartStep, :]
 
     # ax = plt.subplot(axlen,1,id+1)
     # ax.plot('datetime', 'flow', data=flow_df, color="red",label="S-OUT")
@@ -164,8 +176,14 @@ for id, product_id in enumerate(product_ids):
     print(x_95, y_95)
     axs[0].plot(x_95, y_95, label='95', color="red", marker='.', linestyle='--')
 
+    # province_df = pivProvince_df[(pivProvince_df['product_id'] == product_id) & (pivProvince_df['flow'] > 0)]
+    # axs[1].bar(province_df['省份'], province_df['flow'], label=product_id)
+    # axs[1].plot(province_df['省份'], province_df['flow'], label=str(product_id) + 'line')
+
     province_df = pivProvince_df[pivProvince_df['product_id'] == product_id]
-    axs[1].bar(province_df['省份'], province_df['flow'], label=product_id)
+    axs[1].bar(province_df.index, province_df['占比'], label=product_id)
+
+    # axs[1].plot(province_df['省份'], province_df['flow'], label=str(product_id) + 'line')
 
     # ax1=plt.subplot(411)
     # ax2=plt.subplot(412)
@@ -192,6 +210,9 @@ xminor_tick = pivotable_df[pivotable_df['xtick'].isin([1])]
 axs[0].set_xticks(ticks=xminor_tick['begin_time'], minor=True)
 axs[0].set_xticklabels(labels=xminor_tick['begin_time'].str[8:10], minor=True)
 
+axs[1].set_xticks(pivProvince_df.index)
+axs[1].set_xticklabels(pivProvince_df['省份'])
+
 axs[0].legend()
 axs[1].legend()
 
@@ -202,6 +223,21 @@ plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 # plt.legend()
+plt.show()
+#%%
+sns.set(style="whitegrid")
+sns.set(font='SimHei')  # 解决Seaborn中文显示问题
+
+orde = pivProvince_df.loc[pivProvince_df['product_id'] == 9001035304, '省份']
+gp = sns.catplot(x='省份',
+                 y='占比',
+                 hue='product_id',
+                 data=pivProvince_df,
+                 kind='bar',
+                 palette="muted",
+                 height=6,
+                 order=orde)
+# gp.despine(left=True)
 plt.show()
 
 #%%
