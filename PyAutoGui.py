@@ -4,7 +4,6 @@ import time
 import pandas as pd
 import pyautogui
 import pyperclip
-from pandas import DataFrame, ExcelWriter, Series, np
 
 import TxtOperator
 
@@ -72,8 +71,11 @@ which = 0
 READ = '已阅。'
 
 # ------------------------------------------------------------------------------------------
-imgsdir = r'F:\个人文件夹\ProJects\LearnCharmPro\Inputs\PyAutoGui'
-xlsx = r'F:\个人文件夹\ProJects\LearnCharmPro\Inputs\PyAutoGui.xlsx'
+inputFolder = os.path.abspath(r'..\..')
+inputFolder = os.path.join(inputFolder, 'Inputs', 'LearnCharmPro')
+
+imgsdir = os.path.join(inputFolder, 'PyAutoGui')
+xlsx = os.path.join(inputFolder, 'PyAutoGui.xlsx')
 
 sf_gui = pd.read_excel(xlsx)
 # print(sf_gui.shape)
