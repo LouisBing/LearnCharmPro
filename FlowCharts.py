@@ -2,10 +2,11 @@
 import os
 import time
 from math import ceil
-import numpy as np
-import pandas as pd
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
 import FileOperator
@@ -52,15 +53,18 @@ sidf_header = pd.read_excel(header_file, sheet_name=3, header=0, index_col=0)
 xlslist = []
 fileList = FileOperator.getAllFiles(folder, notDeeep=True)
 # print(len(fileList))
-for file in fileList:
-    if ('.xls' in file) and ('~$' not in file):
-        print(file)
-        xlslist.append(file)
+isxlsx = True
+if isxlsx:
+    for file in fileList:
+        if ('.xls' in file) and ('~$' not in file):
+            print(file)
+            xlslist.append(file)
+else:
+    xlslist = fileList
 iscon = len(xlslist)
 
-boss_df = pd.DataFrame()
-pivotable_df = pd.DataFrame()
-pivProvince_df = maxDateFlow_df = pivFlow_df = pd.DataFrame()
+# 全局变量初始化
+boss_df = sf_Header = pivotable_df = pivProvince_df = maxDateFlow_df = pivFlow_df = pd.DataFrame()
 timestep = 6
 step = int(timestep * 60 / 5)
 if (isx == False or iscon > 1):
@@ -72,15 +76,28 @@ if (isx == False or iscon > 1):
     headerlist = []
 
     # 数据导入-依次读取每个Excel文件并进行连接
-    for file in xlslist:
-        sf = pd.read_excel(file, sheet_name=0, header=None, skiprows=range(headerrows), dtype={2: str})
-        sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
-        exlist.append(sf)
-        headerlist.append(sfH)
-
+    if isxlsx:
+        for file in xlslist:
+            sf = pd.read_excel(file, sheet_name=0, header=None, skiprows=range(headerrows), dtype={2: str})
+            sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
+            exlist.append(sf)
+            headerlist.append(sfH)
+    else:
+        for file in xlslist:
+            sf = pd.read_csv(file,
+                             skiprows=1,
+                             header=None,
+                             skipfooter=1,
+                             skipinitialspace=True,
+                             engine='python',
+                             dtype={2: str})
+            # sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
+            exlist.append(sf)
+            # headerlist.append(sfH)
     # 数据规整-连接
     boss_df = pd.concat(exlist, sort=False, ignore_index=True)
-    sf_Header = pd.concat(headerlist, sort=False, ignore_index=True)
+    if isxlsx:
+        sf_Header = pd.concat(headerlist, sort=False, ignore_index=True)
 
     # 替换表头
     headerindex = 5
@@ -169,12 +186,12 @@ for id, product_id in enumerate(product_ids):
     axs[0].set_title('CDN业务流量图')
     axs[0].set_xlabel('时间')
     axs[0].set_ylabel('流量(Mbps)')
-    axs[0].plot(flow_df['begin_time'], flow_df['bandwidth-cm'], label=product_id)
+    axs[0].plot(flow_df['begin_time'], flow_df['bandwidth-cm'], label=product_id, marker='1')
 
     x_95 = [flow_df['begin_time'].iloc[0], flow_df['begin_time'].iloc[-1]]
     y_95 = [charge_95, charge_95]
     print(x_95, y_95)
-    axs[0].plot(x_95, y_95, label='95', color="red", marker='.', linestyle='--')
+    axs[0].plot(x_95, y_95, color="red", marker='.', linestyle='--')
 
     # province_df = pivProvince_df[(pivProvince_df['product_id'] == product_id) & (pivProvince_df['flow'] > 0)]
     # axs[1].bar(province_df['省份'], province_df['flow'], label=product_id)
@@ -214,7 +231,7 @@ axs[1].set_xticks(pivProvince_df.index)
 axs[1].set_xticklabels(pivProvince_df['省份'])
 
 axs[0].legend()
-axs[1].legend()
+# axs[1].legend()
 
 # 解决无法显示中文问题
 # 步骤一（替换sans-serif字体）
@@ -229,14 +246,22 @@ sns.set(style="whitegrid")
 sns.set(font='SimHei')  # 解决Seaborn中文显示问题
 
 orde = pivProvince_df.loc[pivProvince_df['product_id'] == 9001035304, '省份']
-gp = sns.catplot(x='省份',
-                 y='占比',
-                 hue='product_id',
-                 data=pivProvince_df,
-                 kind='bar',
-                 palette="muted",
-                 height=6,
-                 order=orde)
+# gp = sns.catplot(x='省份',
+#                  y='占比',
+#                  hue='product_id',
+#                  data=pivProvince_df,
+#                  kind='bar',
+#                  palette="muted",
+#                  height=6,
+#                  order=orde)
+gp = sns.catplot(
+    x='省份',
+    y='占比',
+    hue='product_id',
+    data=pivProvince_df,
+    kind='bar',
+    #  palette="muted",
+    height=6)
 # gp.despine(left=True)
 plt.show()
 
@@ -256,7 +281,7 @@ else:
     print('重新写入中···')
     # 单文件多表输出
     writer = pd.ExcelWriter(outfile_xls, engine='xlsxwriter')
-    boss_df.to_excel(writer, index=False, sheet_name='汇总数据')
+    # boss_df.to_excel(writer, index=False, sheet_name='汇总数据')
     sf_Header.to_excel(writer, sheet_name='表头汇总')
 
     pivotable_df.to_excel(writer, merge_cells=False, sheet_name='汇总透视')
