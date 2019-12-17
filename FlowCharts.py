@@ -78,10 +78,13 @@ if (isx == False or iscon > 1):
     # 数据导入-依次读取每个Excel文件并进行连接
     if isxlsx:
         for file in xlslist:
-            sf = pd.read_excel(file, sheet_name=0, header=None, skiprows=range(headerrows), dtype={2: str})
-            sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
-            exlist.append(sf)
-            headerlist.append(sfH)
+            sheet_list = [0, 1, 2]
+            sf = pd.read_excel(file, sheet_name=sheet_list, header=None, skiprows=range(headerrows), dtype={2: str})
+            sfH = pd.read_excel(file, sheet_name=sheet_list, header=None, nrows=headerrows)
+            for si in sheet_list:
+                print('si=', si)
+                exlist.append(sf[si])
+                headerlist.append(sfH[si])
     else:
         for file in xlslist:
             sf = pd.read_csv(file,
