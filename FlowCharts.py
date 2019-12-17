@@ -158,6 +158,13 @@ elif (isx == True and iscon == 1):
     print('直接读取汇总透视')
     # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0,1],index_col=[0,1])
     pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], dtype={'begin_time': str})
+
+    # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], parse_dates=['begin_time'])
+    # gyf = pivotable_df.groupby(['product_id'])
+    # gyf.resample('D',on='begin_time').max()
+    # gyf.resample('M',on='begin_time').sum()
+    # dm = gyf.resample('D',on='begin_time',kind='period').max()
+
     pivProvince_df = pd.read_excel(outfile_xls, sheet_name='省份透视', header=[0], index_col=[0])
     pivFlow_df = pd.read_excel(outfile_xls, sheet_name='总流量透视', header=[0], index_col=[0])
     print('直接读取完成')
