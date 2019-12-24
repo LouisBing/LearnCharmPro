@@ -17,7 +17,8 @@ import TxtOperator
 def mark_95(flow_df, sort_col, out_col):
     n95 = ceil(flow_df.shape[0] * 0.05)
     flow_df.sort_values(sort_col, ascending=False, inplace=True)
-    flow_df.iloc[:n95, :][out_col] = 'OUT'
+    flow_df.iloc[0:1,:][out_col] = 'MAX'
+    flow_df.iloc[1:n95, :][out_col] = 'OUT'
     flow_df.iloc[n95:n95 + 1, :][out_col] = 'OK'
     # print(flow_df)
     return flow_df
@@ -78,8 +79,9 @@ if (isx == False or iscon > 1):
     # 数据导入-依次读取每个Excel文件并进行连接
     if isxlsx:
         for file in xlslist:
-            sheet_list = [0, 1, 2]
-            sf = pd.read_excel(file, sheet_name=sheet_list, header=None, skiprows=range(headerrows), dtype={2: str})
+            sheet_list = [0]
+            # sf = pd.read_excel(file, sheet_name=sheet_list, header=None, skiprows=range(headerrows), dtype={2: str})
+            sf = pd.read_excel(file, sheet_name=sheet_list, header=None, skiprows=range(headerrows), parse_dates=[2])
             sfH = pd.read_excel(file, sheet_name=sheet_list, header=None, nrows=headerrows)
             for si in sheet_list:
                 print('si=', si)
@@ -110,7 +112,9 @@ if (isx == False or iscon > 1):
     boss_df.rename(columns=title, inplace=True)
     print(boss_df.info())
 
-    pivotable_df = boss_df.pivot_table(index=['product_id', 'begin_time'], values=['flow'], aggfunc=['sum', 'count'])
+    # pivotable_df = boss_df.pivot_table(index=['product_id', 'begin_time'], values=['flow'], aggfunc=['sum', 'count'])
+    group_pivot = boss_df.groupby(['product_id']).resample('5T', on='begin_time')
+    pivotable_df= group_pivot['flow'].apply(['sum','count'])
     pivotable_df.columns = ['flow', 'count-flow']
     pivotable_df['bandwidth-icp'] = pivotable_df['flow'] * 8 * 1024 / 300 / 1000 / 1000
     pivotable_df['bandwidth-cm'] = pivotable_df['flow'] * 8 / 300 / 1024
@@ -118,8 +122,8 @@ if (isx == False or iscon > 1):
     pivotable_df['95'] = 'IN'
 
     pivotable_df.reset_index(inplace=True)
-    pivotable_df['date'] = pivotable_df['begin_time'].str.slice(0, 8)
-    pivotable_df['time'] = pivotable_df['begin_time'].str.slice(8, )
+    # pivotable_df['date'] = pivotable_df['begin_time'].str.slice(0, 8)
+    # pivotable_df['time'] = pivotable_df['begin_time'].str.slice(8, )
 
     # 时间刻度间隔，单位小时
     code_time = pd.read_excel(code_file, sheet_name=0, dtype={'time': str})
@@ -127,7 +131,7 @@ if (isx == False or iscon > 1):
     code_time.loc[::step, 'xtick'] = 1
     code_time.loc[code_time['time'] == '000000', 'xtick'] = 0
 
-    pivotable_df = pd.merge(pivotable_df, code_time, how='left', on='time')
+    # pivotable_df = pd.merge(pivotable_df, code_time, how='left', on='time')
     # pivotable_df.set_index(['product_id', 'begin_time'],inplace=True)
 
     pivProvince_df = boss_df.pivot_table(index=['product_id', 'province'], values=['flow'], aggfunc='sum')
@@ -150,16 +154,17 @@ if (isx == False or iscon > 1):
                               suffixes=('', '-pidsum'))
     pivProvince_df['占比'] = pivProvince_df['flow'] / pivProvince_df['flow-pidsum']
 
-    group_df = pivotable_df.groupby(['product_id', 'date'])
-    maxDateFlow_df = group_df.apply(lambda x: x.nlargest(2, 'bandwidth-cm'))
+    # group_df = pivotable_df.groupby(['product_id', 'date'])
+    # maxDateFlow_df = group_df.apply(lambda x: x.nlargest(2, 'bandwidth-cm'))
+    maxDateFlow_df = pivotable_df.loc[pivotable_df['95'] == 'MAX',:]
     print('合并和重新生成完成')
 
 elif (isx == True and iscon == 1):
     print('直接读取汇总透视')
     # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0,1],index_col=[0,1])
-    pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], dtype={'begin_time': str})
+    # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], dtype={'begin_time': str})
 
-    # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], parse_dates=['begin_time'])
+    pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], parse_dates=['begin_time'])
     # gyf = pivotable_df.groupby(['product_id'])
     # gyf.resample('D',on='begin_time').max()
     # gyf.resample('M',on='begin_time').sum()
@@ -229,13 +234,13 @@ for id, product_id in enumerate(product_ids):
 # plt.xticks(ticks=xloc_date['datetime'],rotation=45)
 # plt.xticks(ticks=xloc_date, rotation=40)
 
-xmajor_tick = pivotable_df[pivotable_df['xtick'] == 0]
-axs[0].set_xticks(ticks=xmajor_tick['begin_time'])
-axs[0].set_xticklabels(labels=xmajor_tick['begin_time'].str[4:8])
-# 使用isin，相当于==
-xminor_tick = pivotable_df[pivotable_df['xtick'].isin([1])]
-axs[0].set_xticks(ticks=xminor_tick['begin_time'], minor=True)
-axs[0].set_xticklabels(labels=xminor_tick['begin_time'].str[8:10], minor=True)
+# xmajor_tick = pivotable_df[pivotable_df['xtick'] == 0]
+# axs[0].set_xticks(ticks=xmajor_tick['begin_time'])
+# axs[0].set_xticklabels(labels=xmajor_tick['begin_time'].str[4:8])
+# # 使用isin，相当于==
+# xminor_tick = pivotable_df[pivotable_df['xtick'].isin([1])]
+# axs[0].set_xticks(ticks=xminor_tick['begin_time'], minor=True)
+# axs[0].set_xticklabels(labels=xminor_tick['begin_time'].str[8:10], minor=True)
 
 axs[1].set_xticks(pivProvince_df.index)
 axs[1].set_xticklabels(pivProvince_df['省份'])
