@@ -19,6 +19,8 @@ def mark_95(flow_df, sort_col, out_col):
     flow_df.sort_values(sort_col, ascending=False, inplace=True)
     flow_df.iloc[:n95, :][out_col] = 'OUT'
     flow_df.iloc[n95:n95 + 1, :][out_col] = 'OK'
+    flow_df.iloc[n95:n95 + 1, -1] = 4
+
     # print(flow_df)
     return flow_df
 
@@ -65,8 +67,6 @@ iscon = len(xlslist)
 
 # 全局变量初始化
 boss_df = sf_Header = pivotable_df = pivProvince_df = maxDateFlow_df = pivFlow_df = pd.DataFrame()
-timestep = 6
-step = int(timestep * 60 / 5)
 if (isx == False or iscon > 1):
     print('需要合并和重新生成')
     # 数据保量相关变量
@@ -78,7 +78,8 @@ if (isx == False or iscon > 1):
     # 数据导入-依次读取每个Excel文件并进行连接
     if isxlsx:
         for file in xlslist:
-            sheet_list = [0, 1, 2]
+            pd_xls = pd.ExcelFile(file)
+            sheet_list = pd_xls.sheet_names[:]
             sf = pd.read_excel(file, sheet_name=sheet_list, header=None, skiprows=range(headerrows), dtype={2: str})
             sfH = pd.read_excel(file, sheet_name=sheet_list, header=None, nrows=headerrows)
             for si in sheet_list:
@@ -121,9 +122,16 @@ if (isx == False or iscon > 1):
     pivotable_df['date'] = pivotable_df['begin_time'].str.slice(0, 8)
     pivotable_df['time'] = pivotable_df['begin_time'].str.slice(8, )
 
-    # 时间刻度间隔，单位小时
+    # 时间刻度间隔，单位：小时
+    timestep = 6
+    step = int(timestep * 60 / 5)
+    # 流量图中时间点间隔，单位：分钟
+    chartStep = 60
+    chartStep = int(chartStep / 5)
+
     code_time = pd.read_excel(code_file, sheet_name=0, dtype={'time': str})
     code_province = pd.read_excel(code_file, sheet_name=1)
+    code_time.loc[::chartStep, 'xtick'] = 2
     code_time.loc[::step, 'xtick'] = 1
     code_time.loc[code_time['time'] == '000000', 'xtick'] = 0
 
@@ -151,7 +159,7 @@ if (isx == False or iscon > 1):
     pivProvince_df['占比'] = pivProvince_df['flow'] / pivProvince_df['flow-pidsum']
 
     group_df = pivotable_df.groupby(['product_id', 'date'])
-    maxDateFlow_df = group_df.apply(lambda x: x.nlargest(2, 'bandwidth-cm'))
+    maxDateFlow_df = group_df.apply(lambda x: x.nlargest(1, 'bandwidth-cm'))
     print('合并和重新生成完成')
 
 elif (isx == True and iscon == 1):
@@ -177,12 +185,8 @@ for id, product_id in enumerate(product_ids):
     # idx = pd.IndexSlice
     # plot_data = pivotable_df.loc[idx[9001035304],idx['sum']]
     flow_df = pivotable_df.loc[pivotable_df['product_id'] == product_id]
+    flow_df = flow_df.loc[flow_df['xtick'].notna()]
     charge_95 = flow_df.loc[flow_df['95'] == 'OK', 'bandwidth-cm'].iloc[0]
-
-    # 流量图中时间点间隔，单位：分钟
-    chartStep = 60
-    chartStep = int(chartStep / 5)
-    flow_df = flow_df.iloc[::chartStep, :]
 
     # ax = plt.subplot(axlen,1,id+1)
     # ax.plot('datetime', 'flow', data=flow_df, color="red",label="S-OUT")
