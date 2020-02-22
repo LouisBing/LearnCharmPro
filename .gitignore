@@ -140,6 +140,7 @@ gen
 
 # IntelliJ project files
 .idea/
+.vs/
 out/
 gen/
 Inputs/
