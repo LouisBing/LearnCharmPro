@@ -63,12 +63,29 @@ for i in range(org_name.shape[0]):
 
     table_df = pd.read_csv(StringIO(tbody.text), header=None, sep=' ')
     print(table_df)
-    table_df['org'] = name_i
+    table_df.insert(0, '主办单位', name_i)
+    # table_df['主办单位'] = name_i
     org_All = org_All.append(table_df, ignore_index=True)
     time.sleep(0.5)
     SearDel = browser.find_element_by_id('SearDel')
     SearDel.click()
 
+org_All.loc[:, 5] = org_All.loc[:, 5] + ' ' + org_All.loc[:, 6]
+org_All.drop(columns=6, inplace=True)
+
+thead = browser.find_element_by_css_selector("thead")
+header = thead.text
+header = header.split('\n')
+header_s = pd.Series(header)
+
+org_All.rename(columns=header_s, inplace=True)
+
+# header.append('审核时间-时间')
+# header.append('主办单位')
+# print(header)
+
+# org_All.columns = header
+# org_All.reindex()
 # outname = browser.find_element_by_xpath('//*[@id="first"]/li[1]/p/a')
 # print(outname.text)
 
