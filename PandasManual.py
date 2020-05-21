@@ -22,6 +22,10 @@ cdf = pd.concat([adf, bdf], axis=1)
 # print(sidf_header.dtypes)
 # print(sidf_header)
 
+# 获取唯一值
+# sidf_header['col'].unique()
+# df['col1'].drop_duplicates()
+# df.drop_duplicates(subset=['col1','col2'], inplace=False)
 # # ------------------------------------------------------------------------------------------
 # # 数据清洗
 #%% 增
