@@ -10,6 +10,9 @@ xlsx = os.path.join(inputFolder, '【PandasTest】变量导入.xlsx')
 adf:pd.DataFrame = pd.read_excel(xlsx, header=0, sheet_name=0, index_col=0)
 bdf:pd.DataFrame = pd.read_excel(xlsx, header=0, sheet_name=1, index_col=0)
 cdf = pd.concat([adf, bdf], axis=1)
+
+sheets_dfs = pd.read_excel(xlsx, sheet_name=None)
+domain_df = sheets_dfs['域名']
 #%%
 # # 数据导入
 # sf = pd.read_excel(file, sheet_name=0, header=None, skiprows=range(headerrows))
