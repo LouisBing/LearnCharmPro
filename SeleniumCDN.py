@@ -45,7 +45,18 @@ user_login = browser.find_element_by_css_selector('span.cm-touch-ripple')
 user_login.click()
 
 time.sleep(3)
-bandwidth = browser.find_element_by_css_selector('div[data-text="带宽"]')
-bandwidth.click()
+manager = browser.find_element_by_css_selector('li.cm-menu-submenu')
+fenxi = browser.find_element_by_css_selector('li.cm-menu-submenu > div > span')
+# bandwidth = browser.find_element_by_css_selector('div[data-text="带宽"]')
 
+bandwidth = browser.find_element_by_xpath('//*[@id="root"]/div/div[2]/div[1]/ul/li[2]/ul/li[1]/ul/li[1]/a')
+# bandwidth.click()
+
+action = ActionChains(browser)
+action.move_to_element(manager)
+action.move_to_element(fenxi)
+action.move_to_element(bandwidth)
+action.click()
+
+action.perform()
 # browser.close()
