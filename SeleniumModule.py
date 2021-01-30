@@ -13,8 +13,8 @@ xlsx = os.path.join(inputFolder, '【PandasTest】变量导入.xlsx')
 org_name = pd.read_excel(xlsx, sheet_name='站长单位')
 org_All = pd.DataFrame()
 
-browser = webdriver.Chrome()
-# browser = webdriver.Edge()
+# browser = webdriver.Chrome()
+browser = webdriver.Edge()
 browser.maximize_window()
 
 url = 'http://icp.chinaz.com/'
@@ -93,7 +93,7 @@ org_All.rename(columns=header_s, inplace=True)
 
 fileR = xlsx
 tNow = time.strftime("%H%M%S", time.localtime())
-fileW = fileR[:fileR.rfind('.')] + '-PANDAS-' + tNow + '.xlsx'
+fileW = fileR[:fileR.rfind('.')] + '_PANDAS_' + tNow + '.xlsx'
 
 # 单文件单表输出
 org_All.to_excel(fileW, sheet_name='ALL')
