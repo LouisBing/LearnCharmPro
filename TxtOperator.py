@@ -12,7 +12,8 @@ shiyan = re.compile(r'=.*=.*= (\d+)ms')
 inputSplit = re.compile(r',')
 # print(datetime.datetime.now())
 
-def readTxt2List(txtFile,allList=True):
+
+def readTxt2List(txtFile, allList=True):
     cmds = open(txtFile, u'rb')
     inputsList = []
     inputsLines = cmds.readlines()
@@ -35,6 +36,7 @@ def readTxt2List(txtFile,allList=True):
     cmds.close()
     return inputsList
 
+
 def writeList2Txt(txtFile, valueList, op=u'w'):
     cmd_tracert_result = open(txtFile, op, encoding='utf-8')
     for value in valueList:
@@ -42,11 +44,12 @@ def writeList2Txt(txtFile, valueList, op=u'w'):
         cmd_tracert_result.write('\n')
     cmd_tracert_result.close()
 
+
 # readTxt2List测试
-if __name__== '__main__':
+if __name__ == '__main__':
     # txtFile = u'TxtOperator.txt'
     txtFile = u'Inputs\TxtOperator.txt'
-    inputsList = readTxt2List(txtFile,True)
+    inputsList = readTxt2List(txtFile, True)
     for dirItr in inputsList:
         print(dirItr)
         # for d in dirItr:

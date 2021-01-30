@@ -26,7 +26,7 @@ def mark_95(flow_df, sort_col, out_col):
 
 #%%
 # ------------------------------------------------------------------------------------------
-# 场景：从TXT文件中输入变量
+# 场景：从TXT文件中读取输入变量
 inputFolder = os.path.abspath(r'..\..')
 inputFolder = os.path.join(inputFolder, 'Inputs', 'LearnCharmPro')
 
