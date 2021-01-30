@@ -205,7 +205,7 @@ elif SCENE == 1:
     # 根据文件名自动生成输出文件名
     fileR = newFile
     tNow = time.strftime("%H%M%S", time.localtime())
-    fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
+    fileW = fileR[:fileR.rfind('.')]+'_PANDAS_' + tNow + '.xlsx'
     # 单表输出
     sfall.to_excel(fileW)
 elif SCENE == 2:
@@ -228,7 +228,7 @@ elif SCENE == 2:
 
     # 根据输入文件名自动生成输出文件名
     tNow = time.strftime("%H%M%S", time.localtime())
-    fileW = header_file[:header_file.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
+    fileW = header_file[:header_file.rfind('.')]+'_PANDAS_' + tNow + '.xlsx'
     # 单文件多表输出
     writer = pd.ExcelWriter(fileW,engine='xlsxwriter')
     sidf_header1.to_excel(writer,sheet_name='表头1')
@@ -255,7 +255,7 @@ elif SCENE == 3:
 
     # 根据输入文件名自动生成输出文件名
     tNow = time.strftime("%H%M%S", time.localtime())
-    fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
+    fileW = fileR[:fileR.rfind('.')]+'_PANDAS_' + tNow + '.xlsx'
 
     # 单文件多表输出
     writer = pd.ExcelWriter(fileW,engine='xlsxwriter')

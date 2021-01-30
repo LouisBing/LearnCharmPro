@@ -82,7 +82,7 @@ domain_df = sheets_dfs['域名']
 # # 根据输入文件名自动生成输出文件名
 # fileR = header_file
 # tNow = time.strftime("%H%M%S", time.localtime())
-# fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
+# fileW = fileR[:fileR.rfind('.')]+'_PANDAS_' + tNow + '.xlsx'
 
 # # 单文件单表输出
 # sidf_header.to_excel(fileW, sheet_name='all')

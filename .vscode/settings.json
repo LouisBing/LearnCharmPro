@@ -5,6 +5,7 @@
     "python.linting.pylintEnabled": false,
     "python.jediEnabled": false,
     "python.autoComplete.addBrackets": true,
+    "python.analysis.typeCheckingMode":"off",
     "python.formatting.provider": "yapf",
     "python.formatting.yapfArgs": ["--style", "{COLUMN_LIMIT: 120}"],
     "python.linting.pylintArgs": [
@@ -12,13 +13,6 @@
         // "--enable=F,E,unreachable,duplicate-key,unnecessary-semicolon,global-variable-not-assigned,unused-variable,binary-op-exception,bad-format-string,anomalous-backslash-in-string,bad-open-mode",
         "--enable=F,E,unused-import,unreachable,unused-variable,bad-format-string",
         "--disable=abstract-class-instantiated"
-    ],
-    // "python.pythonPath": "C:\\Program Files\\Python\\Python36\\python.exe",
-    "python.autoComplete.extraPaths": [
-        "C:/Program Files/Python/Python36/Lib/site-packages/pandas",
-        "C:/Program Files/Python/Python36/Lib/site-packages",
-        "C:\\Program Files\\Python\\Python36\\Lib\\site-packages",
-        "C:\\Program Files\\Python\\Python36\\Lib\\site-packages\\pandas"
     ],
     "editor.quickSuggestions": {
         "other": true,
@@ -36,5 +30,5 @@
     "workbench.editor.limit.enabled": true,
     "workbench.editor.limit.value": 5,
     "workbench.editor.limit.perEditorGroup": true,
-    "python.languageServer": "Microsoft"
+    "python.languageServer": "Pylance"
 }

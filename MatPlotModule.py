@@ -291,7 +291,7 @@ plt.show()
 # 根据输入文件名自动生成输出文件名
 fileR = xlsx
 tNow = time.strftime("%H%M%S", time.localtime())
-fileW = fileR[:fileR.rfind('.')]+'-PANDAS-' + tNow + '.xlsx'
+fileW = fileR[:fileR.rfind('.')]+'_PANDAS_' + tNow + '.xlsx'
 
 # 单文件多表输出
 writer = pd.ExcelWriter(fileW,engine='xlsxwriter')
