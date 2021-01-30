@@ -13,7 +13,7 @@ import FileOperator
 import TxtOperator
 
 # ------------------------------------------------------------------------------------------
-# 场景：从TXT文件中输入变量
+# 场景：从TXT文件中读取输入变量
 txtFile = r'Inputs\PandasTemplate.txt'
 inputsList = TxtOperator.readTxt2List(txtFile,False)
 print(inputsList)
