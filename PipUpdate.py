@@ -36,7 +36,7 @@ for resline_i in lines:
 
 size_l = len(lines)
 for packi in range(2, size_l):
-    print('%s/%s' % (packi, size_l-1))
+    print('%s/%s' % (packi - 1, size_l - 1))
     packinfo = lines[packi]
     packinfo = packinfo.split()
     # print(packinfo)
