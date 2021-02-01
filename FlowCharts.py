@@ -17,7 +17,7 @@ import TxtOperator
 def mark_95(flow_df, sort_col, out_col):
     n95 = ceil(flow_df.shape[0] * 0.05)
     flow_df.sort_values(sort_col, ascending=False, inplace=True)
-    flow_df.iloc[0:1,:][out_col] = 'MAX'
+    flow_df.iloc[0:1, :][out_col] = 'MAX'
     flow_df.iloc[1:n95, :][out_col] = 'OUT'
     flow_df.iloc[n95:n95 + 1, :][out_col] = 'OK'
     # print(flow_df)
@@ -25,7 +25,6 @@ def mark_95(flow_df, sort_col, out_col):
 
 
 #%%
-# ------------------------------------------------------------------------------------------
 # 场景：从TXT文件中读取输入变量
 inputFolder = os.path.abspath(r'..\..')
 inputFolder = os.path.join(inputFolder, 'Inputs', 'LearnCharmPro')
@@ -34,10 +33,22 @@ txtFile = os.path.join(inputFolder, 'FlowCharts.txt')
 inputsList = TxtOperator.readTxt2List(txtFile, False)
 print(inputsList)
 
+inputFolder = os.path.abspath(r'..\..')
+inputFolder = os.path.join(inputFolder, 'Inputs', 'LearnCharmPro')
+input_file = os.path.join(inputFolder, 'PandasHandBook.xlsx')
+
+map_input_df = pd.read_excel(input_file, sheet_name=None, index_col=0, engine='openpyxl')
+# 全局表头文件，用于替换表头。如果哪个场景需要替换表头，可以使用此表数据
+sidf_header = map_input_df['表头列表']
+
+input_df = map_input_df['FlowCharts']
+inputsList = input_df.iloc[:, 0]
+print(inputsList)
+
 header_file = inputsList[0]
 code_file = inputsList[1]
 read_file = inputsList[2]
-folder = inputsList[3]
+folder = inputsList[9]
 
 outfile_xls = folder + '\\' + folder[folder.rfind('\\') + 1:] + '_PANDAS汇总_' + '.xlsx'
 isx = os.path.exists(outfile_xls)
@@ -48,10 +59,10 @@ isx = os.path.exists(outfile_xls)
 # isx = False
 
 # 全局表头文件，用于替换表头。如果哪个场景需要替换表头，可以使用此表数据
-sidf_header = pd.read_excel(header_file, sheet_name=3, header=0, index_col=0)
+# sidf_header = pd.read_excel(header_file, sheet_name=3, header=0, index_col=0)
 #%%
 # 获取目录下所有文件名，并汇总xls文件
-xlslist = []
+read_file_list = []
 fileList = FileOperator.getAllFiles(folder, notDeeep=True)
 # print(len(fileList))
 isxlsx = True
@@ -59,50 +70,54 @@ if isxlsx:
     for file in fileList:
         if ('.xls' in file) and ('~$' not in file):
             print(file)
-            xlslist.append(file)
+            read_file_list.append(file)
 else:
-    xlslist = fileList
-iscon = len(xlslist)
+    read_file_list = fileList
+iscon = len(read_file_list)
 
 # 全局变量初始化
-boss_df = sf_Header = pivotable_df = pivProvince_df = maxDateFlow_df = pivFlow_df = pd.DataFrame()
+boss_df = sheets_dfheader_all = pivotable_df = pivProvince_df = maxDateFlow_df = pivFlow_df = pd.DataFrame()
 timestep = 6
 step = int(timestep * 60 / 5)
 if (isx == False or iscon > 1):
     print('需要合并和重新生成')
     # 数据保量相关变量
-    exlist = []
+    sheets_df_list = []
     # 设置表头行数
     headerrows = 1
-    headerlist = []
+    sheets_dfheader_list = []
 
     # 数据导入-依次读取每个Excel文件并进行连接
     if isxlsx:
-        for file in xlslist:
+        for file in read_file_list[:3]:
             sheet_list = [0]
             # sf = pd.read_excel(file, sheet_name=sheet_list, header=None, skiprows=range(headerrows), dtype={2: str})
-            sf = pd.read_excel(file, sheet_name=sheet_list, header=None, skiprows=range(headerrows), parse_dates=[2])
-            sfH = pd.read_excel(file, sheet_name=sheet_list, header=None, nrows=headerrows)
+            df_content = pd.read_excel(file,
+                                       sheet_name=sheet_list,
+                                       header=None,
+                                       skiprows=range(headerrows),
+                                       parse_dates=[2])
+            df_header = pd.read_excel(file, sheet_name=sheet_list, header=None, nrows=headerrows)
             for si in sheet_list:
                 print('si=', si)
-                exlist.append(sf[si])
-                headerlist.append(sfH[si])
+                sheets_df_list.append(df_content[si])
+                sheets_dfheader_list.append(df_header[si])
     else:
-        for file in xlslist:
-            sf = pd.read_csv(file,
-                             skiprows=1,
-                             header=None,
-                             skipfooter=1,
-                             skipinitialspace=True,
-                             engine='python',
-                             dtype={2: str})
+        for file in read_file_list:
+            df_content = pd.read_csv(file,
+                                     skiprows=1,
+                                     header=None,
+                                     skipfooter=1,
+                                     skipinitialspace=True,
+                                     engine='python',
+                                     dtype={2: str})
             # sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
-            exlist.append(sf)
-            # headerlist.append(sfH)
+            sheets_df_list.append(df_content)
+            # sheets_dfheader_list.append(sfH)
     # 数据规整-连接
-    boss_df = pd.concat(exlist, sort=False, ignore_index=True)
+    boss_df = pd.concat(sheets_df_list, sort=False, ignore_index=True)
     if isxlsx:
-        sf_Header = pd.concat(headerlist, sort=False, ignore_index=True)
+        sheets_dfheader_all = pd.concat(sheets_dfheader_list, sort=False, ignore_index=True)
 
     # 替换表头
     headerindex = 5
@@ -112,10 +127,14 @@ if (isx == False or iscon > 1):
     boss_df.rename(columns=title, inplace=True)
     print(boss_df.info())
 
+    # 根据product_id分类，5分钟数据汇总统计
     # pivotable_df = boss_df.pivot_table(index=['product_id', 'begin_time'], values=['flow'], aggfunc=['sum', 'count'])
     group_pivot = boss_df.groupby(['product_id']).resample('5T', on='begin_time')
-    pivotable_df= group_pivot['flow'].apply(['sum','count'])
+    pivotable_df = group_pivot['flow'].apply(['sum', 'count'])
+    # 将Multi-Index变为Single-Index
     pivotable_df.columns = ['flow', 'count-flow']
+
+    # 添加新列
     pivotable_df['bandwidth-icp'] = pivotable_df['flow'] * 8 * 1024 / 300 / 1000 / 1000
     pivotable_df['bandwidth-cm'] = pivotable_df['flow'] * 8 / 300 / 1024
     pivotable_df['bandwidth-cm'] = pivotable_df['bandwidth-cm'].map(ceil)
@@ -125,25 +144,29 @@ if (isx == False or iscon > 1):
     # pivotable_df['date'] = pivotable_df['begin_time'].str.slice(0, 8)
     # pivotable_df['time'] = pivotable_df['begin_time'].str.slice(8, )
 
-    # 时间刻度间隔，单位小时
+    # 通过apply为95列打标签
+    group_id = pivotable_df.groupby(['product_id'], group_keys=False)
+    pivotable_df = group_id.apply(mark_95, 'flow', '95')
+    pivotable_df.sort_index(inplace=True)
+    # print(pivotable_df)
+
+    # 读取时间密码，设置时间刻度间隔，单位小时
     code_time = pd.read_excel(code_file, sheet_name=0, dtype={'time': str})
-    code_province = pd.read_excel(code_file, sheet_name=1)
     code_time.loc[::step, 'xtick'] = 1
     code_time.loc[code_time['time'] == '000000', 'xtick'] = 0
 
+    # 与时间密码进行合并
     # pivotable_df = pd.merge(pivotable_df, code_time, how='left', on='time')
     # pivotable_df.set_index(['product_id', 'begin_time'],inplace=True)
 
     pivProvince_df = boss_df.pivot_table(index=['product_id', 'province'], values=['flow'], aggfunc='sum')
     pivProvince_df.reset_index(inplace=True)
+
+    # 与省份密码进行合并
+    code_province = pd.read_excel(code_file, sheet_name=1)
     pivProvince_df = pd.merge(pivProvince_df, code_province, how='inner', on='province')
     pivProvince_df.sort_values(['product_id', 'flow'], ascending=False, inplace=True)
     pivProvince_df.index = range(len(pivProvince_df))
-    #%%
-    group_id = pivotable_df.groupby(['product_id'], group_keys=False)
-    pivotable_df = group_id.apply(mark_95, 'flow', '95')
-    pivotable_df.sort_index(inplace=True)
-    # print(pivotable_df)
 
     pivFlow_df = boss_df.pivot_table(index=['product_id'], values=['flow'], aggfunc='sum')
     pivProvince_df = pd.merge(pivProvince_df,
@@ -156,7 +179,7 @@ if (isx == False or iscon > 1):
 
     # group_df = pivotable_df.groupby(['product_id', 'date'])
     # maxDateFlow_df = group_df.apply(lambda x: x.nlargest(2, 'bandwidth-cm'))
-    maxDateFlow_df = pivotable_df.loc[pivotable_df['95'] == 'MAX',:]
+    maxDateFlow_df = pivotable_df.loc[pivotable_df['95'] == 'MAX', :]
     print('合并和重新生成完成')
 
 elif (isx == True and iscon == 1):
@@ -297,7 +320,7 @@ else:
     # 单文件多表输出
     writer = pd.ExcelWriter(outfile_xls, engine='xlsxwriter')
     # boss_df.to_excel(writer, index=False, sheet_name='汇总数据')
-    sf_Header.to_excel(writer, sheet_name='表头汇总')
+    sheets_dfheader_all.to_excel(writer, sheet_name='表头汇总')
 
     pivotable_df.to_excel(writer, merge_cells=False, sheet_name='汇总透视')
     pivProvince_df.to_excel(writer, merge_cells=False, sheet_name='省份透视')
