@@ -25,14 +25,6 @@ def mark_95(flow_df, sort_col, out_col):
 
 
 #%%
-# 场景：从TXT文件中读取输入变量
-inputFolder = os.path.abspath(r'..\..')
-inputFolder = os.path.join(inputFolder, 'Inputs', 'LearnCharmPro')
-
-txtFile = os.path.join(inputFolder, 'FlowCharts.txt')
-inputsList = TxtOperator.readTxt2List(txtFile, False)
-print(inputsList)
-
 inputFolder = os.path.abspath(r'..\..')
 inputFolder = os.path.join(inputFolder, 'Inputs', 'LearnCharmPro')
 input_file = os.path.join(inputFolder, 'PandasHandBook.xlsx')
@@ -45,27 +37,31 @@ input_df = map_input_df['FlowCharts']
 inputsList = input_df.iloc[:, 0]
 print(inputsList)
 
-header_file = inputsList[0]
+# header_file = inputsList[0]
 code_file = inputsList[1]
 read_file = inputsList[2]
-folder = inputsList[9]
+
+# folder = inputsList[9]
+# isxlsx = True
+
+folder = inputsList[5]
+isxlsx = False
 
 outfile_xls = folder + '\\' + folder[folder.rfind('\\') + 1:] + '_PANDAS汇总_' + '.xlsx'
-isx = os.path.exists(outfile_xls)
+# 汇总文件读取前是否已存在标识
+is_outfile_exist = os.path.exists(outfile_xls)
 # 测试期间可选择每次都删除汇总文件
-# if (isx):
+# if (is_outfile_exist):
 #     print('删除历史汇总文件:', outfile_xls)
 #     os.remove(outfile_xls)
-# isx = False
+# is_outfile_exist = False
 
-# 全局表头文件，用于替换表头。如果哪个场景需要替换表头，可以使用此表数据
-# sidf_header = pd.read_excel(header_file, sheet_name=3, header=0, index_col=0)
 #%%
-# 获取目录下所有文件名，并汇总xls文件
+# 获取目录下所有文件名，并生成待读取文件列表
 read_file_list = []
 fileList = FileOperator.getAllFiles(folder, notDeeep=True)
 # print(len(fileList))
-isxlsx = True
+
 if isxlsx:
     for file in fileList:
         if ('.xls' in file) and ('~$' not in file):
@@ -73,13 +69,15 @@ if isxlsx:
             read_file_list.append(file)
 else:
     read_file_list = fileList
-iscon = len(read_file_list)
+len_toread_file = len(read_file_list)
 
 # 全局变量初始化
 boss_df = sheets_dfheader_all = pivotable_df = pivProvince_df = maxDateFlow_df = pivFlow_df = pd.DataFrame()
-timestep = 6
-step = int(timestep * 60 / 5)
-if (isx == False or iscon > 1):
+
+# 用于测试-强赋值变量
+# len_toread_file = 1
+
+if (is_outfile_exist == False or len_toread_file > 1):
     print('需要合并和重新生成')
     # 数据保量相关变量
     sheets_df_list = []
@@ -87,9 +85,12 @@ if (isx == False or iscon > 1):
     headerrows = 1
     sheets_dfheader_list = []
 
-    # 数据导入-依次读取每个Excel文件并进行连接
+    # 数据导入-依次读取每个文件并进行连接
+    # Excel文件
     if isxlsx:
-        for file in read_file_list[:3]:
+        # 用于测试：文件过多时，只读前3个进行测试
+        # for file in read_file_list[:3]:
+        for file in read_file_list:
             sheet_list = [0]
             # sf = pd.read_excel(file, sheet_name=sheet_list, header=None, skiprows=range(headerrows), dtype={2: str})
             df_content = pd.read_excel(file,
@@ -98,10 +99,11 @@ if (isx == False or iscon > 1):
                                        skiprows=range(headerrows),
                                        parse_dates=[2])
             df_header = pd.read_excel(file, sheet_name=sheet_list, header=None, nrows=headerrows)
-            for si in sheet_list:
-                print('si=', si)
-                sheets_df_list.append(df_content[si])
-                sheets_dfheader_list.append(df_header[si])
+            for sheet_i in sheet_list:
+                print('si=', sheet_i)
+                sheets_df_list.append(df_content[sheet_i])
+                sheets_dfheader_list.append(df_header[sheet_i])
+    # 非Excel文件
     else:
         for file in read_file_list:
             df_content = pd.read_csv(file,
@@ -110,12 +112,11 @@ if (isx == False or iscon > 1):
                                      skipfooter=1,
                                      skipinitialspace=True,
                                      engine='python',
-                                     dtype={2: str})
-            # sfH = pd.read_excel(file, sheet_name=0, header=None, nrows=headerrows)
+                                     parse_dates=[2])
             sheets_df_list.append(df_content)
-            # sheets_dfheader_list.append(sfH)
     # 数据规整-连接
     boss_df = pd.concat(sheets_df_list, sort=False, ignore_index=True)
+    # 表头规整-连接
     if isxlsx:
         sheets_dfheader_all = pd.concat(sheets_dfheader_list, sort=False, ignore_index=True)
 
@@ -151,6 +152,9 @@ if (isx == False or iscon > 1):
     # print(pivotable_df)
 
     # 读取时间密码，设置时间刻度间隔，单位小时
+    # 非DateTime解决办法
+    timestep = 6
+    step = int(timestep * 60 / 5)
     code_time = pd.read_excel(code_file, sheet_name=0, dtype={'time': str})
     code_time.loc[::step, 'xtick'] = 1
     code_time.loc[code_time['time'] == '000000', 'xtick'] = 0
@@ -168,7 +172,10 @@ if (isx == False or iscon > 1):
     pivProvince_df.sort_values(['product_id', 'flow'], ascending=False, inplace=True)
     pivProvince_df.index = range(len(pivProvince_df))
 
+    # 总流量-根据product_id透视
     pivFlow_df = boss_df.pivot_table(index=['product_id'], values=['flow'], aggfunc='sum')
+
+    # 省份合并总流量并求得流量占比
     pivProvince_df = pd.merge(pivProvince_df,
                               pivFlow_df,
                               how='left',
@@ -182,7 +189,7 @@ if (isx == False or iscon > 1):
     maxDateFlow_df = pivotable_df.loc[pivotable_df['95'] == 'MAX', :]
     print('合并和重新生成完成')
 
-elif (isx == True and iscon == 1):
+elif (is_outfile_exist == True and len_toread_file == 1):
     print('直接读取汇总透视')
     # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0,1],index_col=[0,1])
     # pivotable_df = pd.read_excel(outfile_xls, sheet_name='汇总透视', header=[0], index_col=[0], dtype={'begin_time': str})
@@ -198,9 +205,6 @@ elif (isx == True and iscon == 1):
     print('直接读取完成')
 
 #%%
-# le0 = pivotable_df.index.get_level_values(0)
-# le0 = le0.drop_duplicates()
-# product_ids = pivotable_df.index.levels[0]
 product_ids = pivotable_df['product_id'].drop_duplicates()
 axlen = len(product_ids)
 pivProvince_df = pivProvince_df[pivProvince_df['flow'] > 0]
@@ -215,7 +219,7 @@ for id, product_id in enumerate(product_ids):
     charge_95 = flow_df.loc[flow_df['95'] == 'OK', 'bandwidth-cm'].iloc[0]
 
     # 流量图中时间点间隔，单位：分钟
-    chartStep = 60
+    chartStep = 5
     chartStep = int(chartStep / 5)
     flow_df = flow_df.iloc[::chartStep, :]
 
@@ -237,8 +241,6 @@ for id, product_id in enumerate(product_ids):
 
     province_df = pivProvince_df[pivProvince_df['product_id'] == product_id]
     axs[1].bar(province_df.index, province_df['占比'], label=product_id)
-
-    # axs[1].plot(province_df['省份'], province_df['flow'], label=str(product_id) + 'line')
 
     # ax1=plt.subplot(411)
     # ax2=plt.subplot(412)
@@ -268,7 +270,7 @@ for id, product_id in enumerate(product_ids):
 axs[1].set_xticks(pivProvince_df.index)
 axs[1].set_xticklabels(pivProvince_df['省份'])
 
-axs[0].legend()
+# axs[0].legend()
 # axs[1].legend()
 
 # 解决无法显示中文问题
@@ -281,9 +283,11 @@ plt.rcParams['axes.unicode_minus'] = False
 plt.show()
 #%%
 sns.set(style="whitegrid")
-sns.set(font='SimHei')  # 解决Seaborn中文显示问题
+# 解决Seaborn中文显示问题
+sns.set(font='SimHei')
 
-orde = pivProvince_df.loc[pivProvince_df['product_id'] == 9001035304, '省份']
+# 测试-order参数使用
+# orde = pivProvince_df.loc[pivProvince_df['product_id'] == 9001035304, '省份']
 # gp = sns.catplot(x='省份',
 #                  y='占比',
 #                  hue='product_id',
@@ -309,11 +313,11 @@ plt.show()
 # tNow = time.strftime("%H%M%S", time.localtime())
 # fileW = fileR[:fileR.rfind('.')]+'_PANDAS_' + tNow + '.xlsx'
 
-if (isx and iscon > 1):
+if (is_outfile_exist and len_toread_file > 1):
     print('删除历史汇总文件:', outfile_xls)
     os.remove(outfile_xls)
 
-if (isx and iscon == 1):
+if (is_outfile_exist and len_toread_file == 1):
     print('不需要重新写入')
 else:
     print('重新写入中···')
