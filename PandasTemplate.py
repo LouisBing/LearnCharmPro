@@ -30,8 +30,8 @@ if SCENE == 0:
     folder = inputsList[0]
     outfile_xls = folder + '\\' + folder[folder.rfind('\\')+1:] + '_PANDAS汇总_' + '.xlsx'
     # 如果汇总文件已存在，直接删除
-    isx = os.path.exists(outfile_xls)
-    if(isx):
+    is_outfile_exist = os.path.exists(outfile_xls)
+    if(is_outfile_exist):
         print('DelExistFile:', outfile_xls)
         os.remove(outfile_xls)
 

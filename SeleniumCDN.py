@@ -219,8 +219,8 @@ df_RE['Gflow'] = df_RE['Gflow'].map(int, na_action='ignore')
 #%%
 outfile_xls = inputFolder + '\\' + inputFolder[inputFolder.rfind('\\') + 1:] + '_CDN汇总_' + '.xlsx'
 # 如果汇总文件已存在，直接删除
-isx = os.path.exists(outfile_xls)
-if (isx):
+is_outfile_exist = os.path.exists(outfile_xls)
+if (is_outfile_exist):
     print('DelExistFile:', outfile_xls)
     os.remove(outfile_xls)
 
