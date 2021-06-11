@@ -41,42 +41,29 @@ time.sleep(3)
 login = browser.find_element_by_css_selector('a[href]')
 login.click()
 
-# 输入账密
+# 输入账号
 username = browser.find_element_by_css_selector('input[name="username"]')
 username.send_keys(user)
-
+# 输入密码
 password = browser.find_element_by_css_selector('input[name="password"]')
 password.send_keys(passwd)
-
+# 鼠标定位至验证码输入框
 browser.find_element(By.NAME, "verifyCode").click()
 #%%
+# 输入验证码后手工登录，不必使用以下自动登录
+
 # # 等待手工输入验证码
 # waitin = input()
-
 # # 输入账密后正式登录
 # user_login = browser.find_element_by_css_selector('span.cm-touch-ripple')
 # user_login.click()
 #%%
-# 滑动到带宽
-manager = browser.find_element_by_css_selector('li.cm-menu-submenu')
-fenxi = browser.find_element_by_css_selector('li.cm-menu-submenu > div > span')
-# bandwidth = browser.find_element_by_css_selector('div[data-text="带宽"]')
-
-bandwidth = browser.find_element_by_xpath('//*[@id="root"]/div/div[2]/div[1]/ul/li[2]/ul/li[1]/ul/li[1]/a')
-# bandwidth.click()
-
-manager = browser.find_element_by_css_selector('.cm-menu-submenu-title-hover > span > span')
-
-
-manager = browser.find_element_by_css_selector('#root > div > div.main-layout.cm-layout.cm-layout-has-sider > div.sider.cm-layout-sider > ul > li:nth-child(2)')
-browser.find_element_by_xpath('//*[@id="root"]/div/div[2]/div[1]/ul/li[2]/div')
-
-# fenxi = browser.find_element_by_css_selector('li.cm-menu-submenu > div > span')
-# bandwidth = browser.find_element_by_css_selector('div[data-text="带宽"]')
-
-bandwidth = browser.find_element_by_xpath('.cm-menu-item-active > a')
-bandwidth = browser.find_element_by_css_selector('.cm-menu-item-active > a')
-
+# 运营管理
+manager = browser.find_element_by_css_selector(
+    '#root > div > div.main-layout.cm-layout.cm-layout-has-sider > div.sider.cm-layout-sider > ul > li:nth-child(2)')
+# 统计分析
+bandwidth = manager.find_element_by_css_selector('ul > li:nth-child(1) > a')
+# 滑动至统计分析
 action = ActionChains(browser)
 action.move_to_element(manager)
 # action.move_to_element(fenxi)
@@ -94,97 +81,94 @@ WebDriverWait(browser, 100, 0.5).until(expected_conditions.invisibility_of_eleme
 print('loading ok')
 #%%
 # browser.switch_to.frame(0)
-# 点击7天
-# timebuts = browser.find_element_by_css_selector("#cdn-autoid-23 > div > a")
-em = browser.find_element_by_css_selector("#cdn-autoid-23 > div > a:nth-child(3) > span > div > span > div")
+# 7天
+seven_day = browser.find_element_by_css_selector(
+    "#root > div > div > div:nth-child(2) > div:nth-child(1) > div.search-wrap > div.mb-15 > div > a:nth-child(3)")
+
 action = ActionChains(browser)
-action.move_to_element(em)
+action.move_to_element(seven_day)
 action.click()
 action.perform()
+
 # 等待加载完成
 WebDriverWait(browser, 5, 0.1).until(expected_conditions.presence_of_element_located(loading))
 print('loading start')
 WebDriverWait(browser, 100, 0.5).until(expected_conditions.invisibility_of_element_located(loading))
 print('loading ok')
 #%%
-em = browser.find_element(By.CSS_SELECTOR, "#enterpriseSelect")
+# em = browser.find_element(By.CSS_SELECTOR, "#enterpriseSelect")
+# 企业列表框
+enterprise_list = browser.find_element_by_css_selector(
+    "#root > div > div > div:nth-child(2) > div:nth-child(1) > div.search-wrap > div:nth-child(2) > div:nth-child(1) > div:nth-child(2)"
+)
+# 滑动点击
 action = ActionChains(browser)
-action.move_to_element(em)
+action.move_to_element(enterprise_list)
 action.click()
 action.perform()
 
 time.sleep(3)
-# cps = browser.find_elements_by_css_selector("#enterpriseSelect > div > div > div > ul > li")
-cps = browser.find_elements_by_css_selector(
-    " #enterpriseSelect > div > div > div > ul > li > a > span > div > span:nth-child(2)")
+
+# 获取企业列表并打印企业名称
+cps = enterprise_list.find_elements_by_css_selector(
+    "div.cm-select.cm-large-select.cm-select-active > div > div > div.cm-scroll > div:nth-child(3) > div > ul > li")
 for cp in cps:
     print(cp.text)
 # cps[4].click()
 
 cpl = len(cps)
 print(cpl)
+
+# 重要：再次滑动点击企业列表框，收起下拉选项
 action.perform()
 #%%
-# cpl = 5
-# for cpi in range(1,cpl):
-#     em = browser.find_element(By.CSS_SELECTOR, "#enterpriseSelect")
-#     action = ActionChains(browser)
-#     action.move_to_element(em)
-#     action.click()
-#     action.perform()
-#     print('下拉')
+df_seleni_public = pd.read_excel(seleni_public, sheet_name=None)
+df_name = df_seleni_public['客户名称']
+df_unit = df_seleni_public['流量单位']
+cps_namelist = df_name['name'].tolist()
 
-#     cplist = browser.find_elements_by_css_selector("#enterpriseSelect > div > div > div > ul > li")
-#     print('cplist')
-#     # cpi = 4
-#     print(cpi)
-#     cp = cplist[cpi]
-#     # print(cp.text)
-#     cp.click()
-#     print('下拉点击')
-#     # 点击查询
-#     browser.find_element_by_css_selector("#cdn-autoid-43").click()
-#     print('查询')
-#     # 获取峰值
-#     # time.sleep(10)
-#     # print('等待10')
-#     loading = (By.CSS_SELECTOR,"body > div:nth-child(8) > div > div.cm-panel-title > span")
-#     WebDriverWait(browser,5,0.1).until(expected_conditions.presence_of_element_located(loading))
-#     print('loading start')
-#     # WebDriverWait(browser,20,0.5).until_not(expected_conditions.visibility_of_element_located(loading))
-#     # print('loading ok')
-#     WebDriverWait(browser,100,0.5).until(expected_conditions.invisibility_of_element_located(loading))
-#     print('loading ok')
-#     fengzhi = browser.find_element_by_css_selector("#peak")
-#     print(fengzhi.text)
+cps_out = []
+for cp in cps:
+    print(cp.text)
+    if cp.text in cps_namelist:
+        cps_out.append(cp)
+# cps[4].click()
+
+cpl = len(cps_out)
+for cp in cps_out:
+    print(cp.text)
+
 lnf = []
-for cpi in cps[1:]:
-    em = browser.find_element(By.CSS_SELECTOR, "#enterpriseSelect")
+for cpi in cps_out:
+    # 企业列表框
+    enterprise_list = browser.find_element_by_css_selector(
+        "#root > div > div > div:nth-child(2) > div:nth-child(1) > div.search-wrap > div:nth-child(2) > div:nth-child(1) > div:nth-child(2)"
+    )
+    # 滑动点击
     action = ActionChains(browser)
-    action.move_to_element(em)
+    action.move_to_element(enterprise_list)
     action.click()
     action.perform()
+    print('下拉')
 
     time.sleep(1)
+
+    # 滑动点击cpi
     action = ActionChains(browser)
     action.move_to_element(cpi)
     action.click()
     action.perform()
-    action.perform()
-    print('下拉')
+    # action.perform()
+    print('选择企业')
 
-    # cplist = browser.find_elements_by_css_selector("#enterpriseSelect > div > div > div > ul > li")
-    # print('cplist')
-    # # cpi = 4
-    # print(cpi)
-    # cp = cplist[cpi]
-    # print(cp.text)
-    # cpi.click()
-    # print('下拉点击')
-    # 点击查询
-    browser.find_element_by_css_selector("#cdn-autoid-43").click()
+    # cpi_name = enterprise_list.text
+    # print(cpi_name)
+    # if cpi_name in cps_namelist:
+    browser.find_element_by_css_selector(
+        "#root > div > div > div:nth-child(2) > div:nth-child(1) > div.search-wrap > div:nth-child(2) > a").click()
     print('查询')
-    # 获取峰值
+
+    # 等待加载完成
     # time.sleep(10)
     # print('等待10')
     loading = (By.CSS_SELECTOR, "body > div:nth-child(8) > div > div.cm-panel-title > span")
@@ -194,12 +178,14 @@ for cpi in cps[1:]:
     # print('loading ok')
     WebDriverWait(browser, 100, 0.5).until(expected_conditions.invisibility_of_element_located(loading))
     print('loading ok')
-    print(em.text)
+
+    # 获取峰值
+    print(enterprise_list.text)
     fengzhi = browser.find_element_by_css_selector("#peak")
     print(fengzhi.text)
-    lnf.append(em.text + ' ' + fengzhi.text)
+    lnf.append(enterprise_list.text + ' ' + fengzhi.text)
 
-# browser.close()
+browser.quit()
 #%%
 print(lnf)
 snf = pd.Series(lnf)
@@ -207,11 +193,6 @@ sdf = snf.str.split(' ', expand=True)
 sdf.columns = ['name', 'flow', 'unit']
 sdf['flow'] = sdf['flow'].astype(float)
 #%%
-# sdf = pd.read_excel(seleni_re, index_col=0)
-df_seleni_public = pd.read_excel(seleni_public, sheet_name=None)
-df_name = df_seleni_public['客户名称']
-df_unit = df_seleni_public['流量单位']
-
 df_RE = df_name.merge(sdf, how='left')
 df_RE = df_RE.merge(df_unit, how='left')
 df_RE['Gflow'] = df_RE['flow'] * df_RE['系数']
