@@ -15,7 +15,6 @@
   - [1.10. 数据统计](#110-数据统计)
   - [1.11. 网页参考](#111-网页参考)
 
-
 ## 1.2. 导入数据
 
 * pd.read_csv(filename)：从CSV文件导入数据
@@ -110,3 +109,7 @@
 ## 1.11. 网页参考
 
 **[Pandas速查手册](https://zhuanlan.zhihu.com/p/25630700)**
+
+**[Pandas 速查表 | Cheat Sheet (cheat-sheet.cn)](https://www.cheat-sheet.cn/post/pandas-cheat-sheet/)**
+
+**[Pandas Cheat Sheet — Python for Data Science – Dataquest](https://www.dataquest.io/blog/pandas-cheat-sheet/)**
