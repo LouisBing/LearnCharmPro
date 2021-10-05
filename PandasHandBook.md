@@ -1,37 +1,34 @@
 # 1. PandasHandBook
 
-## 1.1. 目录
-
 - [1. PandasHandBook](#1-pandashandbook)
-  - [1.1. 目录](#11-目录)
-  - [1.2. 创建对象](#12-创建对象)
-  - [1.3. 导入数据](#13-导入数据)
-    - [1.3.1. 常用](#131-常用)
-    - [1.3.2. 其它](#132-其它)
-  - [1.4. 数据合并](#14-数据合并)
-  - [1.5. 查看、选取、检查数据](#15-查看选取检查数据)
-    - [1.5.1. 属性](#151-属性)
-    - [1.5.2. 选取](#152-选取)
-    - [1.5.3. 高级](#153-高级)
-      - [1.5.3.1. Summary functions](#1531-summary-functions)
-  - [1.6. 数据清理/处理-增删改](#16-数据清理处理-增删改)
-    - [1.6.1. 增](#161-增)
-    - [1.6.2. 删](#162-删)
-    - [1.6.3. 改](#163-改)
-  - [1.7. 数据处理：Filter、Sort和GroupBy](#17-数据处理filtersort和groupby)
-    - [1.7.1. 筛选](#171-筛选)
-    - [1.7.2. 排序](#172-排序)
-    - [1.7.3. 变型（Reshaping）](#173-变型reshaping)
-  - [1.8. 数据分析](#18-数据分析)
-    - [1.8.1. 分组](#181-分组)
-  - [1.9. 数据合并](#19-数据合并)
-  - [1.10. 数据统计](#110-数据统计)
-  - [1.11. 导出数据](#111-导出数据)
-  - [1.12. 网页参考](#112-网页参考)
-    - [1.12.1. 链接本地文件](#1121-链接本地文件)
-  - [1.13. 下一步计划](#113-下一步计划)
+  - [1.1. 创建对象](#11-创建对象)
+  - [1.2. 导入数据](#12-导入数据)
+    - [1.2.1. 常用](#121-常用)
+    - [1.2.2. 其它](#122-其它)
+  - [1.3. 数据合并](#13-数据合并)
+  - [1.4. 查看、选取、检查数据](#14-查看选取检查数据)
+    - [1.4.1. 属性](#141-属性)
+    - [1.4.2. 选取](#142-选取)
+    - [1.4.3. 高级](#143-高级)
+      - [1.4.3.1. Summary functions](#1431-summary-functions)
+  - [1.5. 数据清理/处理-增删改](#15-数据清理处理-增删改)
+    - [1.5.1. 增](#151-增)
+    - [1.5.2. 删](#152-删)
+    - [1.5.3. 改](#153-改)
+  - [1.6. 数据处理：Filter、Sort和GroupBy](#16-数据处理filtersort和groupby)
+    - [1.6.1. 筛选](#161-筛选)
+    - [1.6.2. 排序](#162-排序)
+    - [1.6.3. 变型（Reshaping）](#163-变型reshaping)
+  - [1.7. 数据分析](#17-数据分析)
+    - [1.7.1. 分组](#171-分组)
+  - [1.8. 数据合并](#18-数据合并)
+  - [1.9. 数据统计](#19-数据统计)
+  - [1.10. 导出数据](#110-导出数据)
+  - [1.11. 网页参考](#111-网页参考)
+    - [1.11.1. 链接本地文件](#1111-链接本地文件)
+  - [1.12. 下一步计划](#112-下一步计划)
 
-## 1.2. 创建对象
+## 1.1. 创建对象
 
 * pd.Series(my_list)：从可迭代对象my_list创建一个Series对象
 * pd.DataFrame(np.random.rand(20,5))：创建20行5列的随机数组成的DataFrame对象
@@ -41,14 +38,14 @@
   df = pd.DataFrame({'A': 1.,'B': pd.Timestamp('20130102')})
   ```
 
-## 1.3. 导入数据
+## 1.2. 导入数据
 
-### 1.3.1. 常用
+### 1.2.1. 常用
 
 * pd.read_excel(filename)：从Excel文件导入数据
 * pd.read_csv(filename)：从CSV文件导入数据
 
-### 1.3.2. 其它
+### 1.2.2. 其它
 
 * pd.read_table(filename)：从限定分隔符的文本文件导入数据
 * pd.read_sql(query, connection_object)：从SQL表/库导入数据
@@ -57,14 +54,14 @@
 * pd.read_clipboard()：从你的粘贴板获取内容，并传给read_table()
 * pd.DataFrame(dict)：从字典对象导入数据，Key是列名，Value是数据
 
-## 1.4. 数据合并
+## 1.3. 数据合并
 
 * df1.append(df2)：将df2中的行添加到df1的尾部
 * df.concat([df1, df2],axis=1)：将df2中的列添加到df1的尾部
 
-## 1.5. 查看、选取、检查数据
+## 1.4. 查看、选取、检查数据
 
-### 1.5.1. 属性
+### 1.4.1. 属性
 
 * df.index
 * df.columns
@@ -74,7 +71,7 @@
 * df.info()：查看索引、数据类型和内存信息
 * df.describe()：查看数值型列的汇总统计
 
-### 1.5.2. 选取
+### 1.4.2. 选取
 
 * df[col]：根据列名，并以Series的形式返回列
 * df[[col1, col2]]：以DataFrame形式返回多列
@@ -85,7 +82,7 @@
 
 * [ ]**df.filter(regex='regex')：Select columns whose name matches regular expression regex**
 
-### 1.5.3. 高级
+### 1.4.3. 高级
 
 * [X] s.unique()：查看唯一值
 * [ ] s.value_counts(dropna=False)：查看Series对象的唯一值和计数
@@ -96,7 +93,7 @@
 * [ ] df.nlargest(n, 'value')：Select and order top n entries.
 * [ ] df.nsmallest(n, 'value')：Select and order bottom n entries
 
-#### 1.5.3.1. Summary functions
+#### 1.4.3.1. Summary functions
 
 * sum()
 * count()
@@ -109,16 +106,16 @@
 * [ ] var()
 * [ ] std()
 
-## 1.6. 数据清理/处理-增删改
+## 1.5. 数据清理/处理-增删改
 
-### 1.6.1. 增
+### 1.5.1. 增
 
 * df.columns = ['a','b','c']：重命名列名
 
 * [ ] df.assign(Area=lambda df: df.Length*df.Height)
 * [ ] df.insert(loc, column, value, allow_duplicates=False)
 
-### 1.6.2. 删
+### 1.5.2. 删
 
 * df.drop(columns=['Length','Height'])：Drop columns from DataFrame
 * df.dropna()：删除所有包含空值的行
@@ -126,7 +123,7 @@
 * df.dropna(axis=1,thresh=n)：删除所有小于n个非空值的行
 * df.drop_duplicates()：Remove duplicate rows (only considers columns).
 
-### 1.6.3. 改
+### 1.5.3. 改
 
 * df.reset_index()：Reset index of DataFrame to row numbers, moving index to columns
 * df.set_index('column_one')：更改索引列
@@ -138,46 +135,46 @@
 * s.replace(1,'one')：用‘one’代替所有等于1的值
 * s.replace([1,3],['one','three'])：用'one'代替1，用'three'代替3
 
-## 1.7. 数据处理：Filter、Sort和GroupBy
+## 1.6. 数据处理：Filter、Sort和GroupBy
 
-### 1.7.1. 筛选
+### 1.6.1. 筛选
 
 * pd.isnull()：检查DataFrame对象中的空值，并返回一个Boolean数组
 * pd.notnull()：检查DataFrame对象中的非空值，并返回一个Boolean数组
 * pd.isin()
 * df[df[col] > 0.5]：选择col列的值大于0.5的行
 
-### 1.7.2. 排序
+### 1.6.2. 排序
 
 * df.sort_values(col1)：按照列col1排序数据，默认升序排列
 * df.sort_values(col2, ascending=False)：按照列col1降序排列数据
 * df.sort_values([col1,col2], ascending=[True,False])：先按列col1升序排列，后按col2降序排列数据
 * df.sort_index()：Sort the index of a DataFrame
 
-### 1.7.3. 变型（Reshaping）
+### 1.6.3. 变型（Reshaping）
 
 * pd.melt(df)：Gather columns into rows
 * df.pivot(columns='var', values='val')：Spread rows into columns
 
-## 1.8. 数据分析
+## 1.7. 数据分析
 
 * df.pivot_table(index=col1, values=[col2,col3], aggfunc=max)：创建一个按列col1进行分组，并计算col2和col3的最大值的数据透视表
 * data.apply(np.mean)：对DataFrame中的每一列应用函数np.mean
 * data.apply(np.max,axis=1)：对DataFrame中的每一行应用函数np.max
 
-### 1.8.1. 分组
+### 1.7.1. 分组
 
 * df.groupby(col)：返回一个按列col进行分组的Groupby对象
 * df.groupby([col1,col2])：返回一个按多列进行分组的Groupby对象
 * *df.groupby(col1)[col2]：返回按列col1进行分组后，列col2的均值?是否缺agg*
 * df.groupby(col1).**agg**(np.mean)：返回按列col1分组的所有列的均值
 
-## 1.9. 数据合并
+## 1.8. 数据合并
 
 * df1.join(df2,on=col1,how='inner')：对df1的列和df2的列执行SQL形式的join
 * pd.merge()
 
-## 1.10. 数据统计
+## 1.9. 数据统计
 
 * df.describe()：查看数据值列的汇总统计
 * df.mean()：返回所有列的均值
@@ -188,37 +185,33 @@
 * df.median()：返回每一列的中位数
 * df.std()：返回每一列的标准差
 
-## 1.11. 导出数据
+## 1.10. 导出数据
 
 * df.to_excel(filename)：导出数据到Excel文件
 * df.to_csv(filename)：导出数据到CSV文件
 * df.to_sql(table_name, connection_object)：导出数据到SQL表
 * df.to_json(filename)：以Json格式导出数据到文本文件
 
-## 1.12. 网页参考
+## 1.11. 网页参考
 
 * **[Pandas速查手册](https://zhuanlan.zhihu.com/p/25630700)**
 * **[Pandas 速查表 | Cheat Sheet (cheat-sheet.cn)](https://www.cheat-sheet.cn/post/pandas-cheat-sheet/)**
 * **[Pandas Cheat Sheet — Python for Data Science – Dataquest](https://www.dataquest.io/blog/pandas-cheat-sheet/)**
 * **[Vditor-Demo](https://b3log.org/vditor/demo/index.html)**
 
-### 1.12.1. 链接本地文件
+### 1.11.1. 链接本地文件
 
 * **[临时文件](.\\PandasManual.py)**
 * **[临时文件](file:///C://Users//Bing//Desktop//临时文件.txt)**
 
-## 1.13. 下一步计划
+## 1.12. 下一步计划
 
 * [X] VSCode选择和操作多行
 
   > [Multiple selections (multi-cursor)](https://code.visualstudio.com/docs/editor/codebasics#_multiple-selections-multicursor)
   >
-  > Alt+Click;
-  > Ctrl+Alt+Down;
-  > Ctrl+Alt+Up;
-  > Ctrl+D;
-  > Ctrl+Shift+L;
-  
+  > Alt+Click;Ctrl+Alt+Down;Ctrl+Alt+Up;Ctrl+D;Ctrl+Shift+L
+  >
 * [X] 将官方速查表功能项
 * [ ] 合并自己整理的速查表功能项
 * [ ] 添加重点函数重点参数
