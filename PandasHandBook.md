@@ -10,9 +10,10 @@
     - [1.3.2. 其它](#132-其它)
   - [1.4. 数据合并](#14-数据合并)
   - [1.5. 查看、选取、检查数据](#15-查看选取检查数据)
-    - [1.5.1. 查看](#151-查看)
-    - [1.5.1.1. 高级](#1511-高级)
+    - [1.5.1. 属性](#151-属性)
     - [1.5.2. 选取](#152-选取)
+    - [1.5.3. 高级](#153-高级)
+      - [1.5.3.1. Summary functions](#1531-summary-functions)
   - [1.6. 数据清理/处理-增删改](#16-数据清理处理-增删改)
     - [1.6.1. 增](#161-增)
     - [1.6.2. 删](#162-删)
@@ -63,45 +64,63 @@
 
 ## 1.5. 查看、选取、检查数据
 
-### 1.5.1. 查看
+### 1.5.1. 属性
 
 * df.index
 * df.columns
+* df.shape()：查看行数和列数
 * df.head(n)：查看DataFrame对象的前n行
 * df.tail(n)：查看DataFrame对象的最后n行
-* df.shape()：查看行数和列数
 * df.info()：查看索引、数据类型和内存信息
 * df.describe()：查看数值型列的汇总统计
-
-### 1.5.1.1. 高级
-
-* s.value_counts(dropna=False)：查看Series对象的唯一值和计数
-* s.unique()：查看唯一值
-* df.apply(pd.Series.value_counts)：查看DataFrame对象中每一列的唯一值和计数
-* df.sample(frac=0.5)：Randomly select fraction of rows. 
-* df.sample(n=10)：Randomly select n rows.
-* df.iloc[10:20]：Select rows by position.
-* df.nlargest(n, 'value')：Select and order top n entries.
-* df.nsmallest(n, 'value')：Select and order bottom n entries
 
 ### 1.5.2. 选取
 
 * df[col]：根据列名，并以Series的形式返回列
 * df[[col1, col2]]：以DataFrame形式返回多列
-* s.iloc[0]：按位置选取数据
-* s.loc['index_one']：按索引选取数据
+* df.loc['index_one']：按索引选取数据
+* df.iloc[0]：按位置选取数据
 * df.iloc[0,:]：返回第一行
 * df.iloc[0,0]：返回第一列的第一个元素
+
+* [ ]**df.filter(regex='regex')：Select columns whose name matches regular expression regex**
+
+### 1.5.3. 高级
+
+* [X] s.unique()：查看唯一值
+* [ ] s.value_counts(dropna=False)：查看Series对象的唯一值和计数
+* [ ] df.nunique()：number of unique elements in the object.distinct values in a column
+* [ ] df.apply(pd.Series.value_counts)：查看DataFrame对象中每一列的唯一值和计数
+* [ ] df.sample(frac=0.5)：Randomly select fraction of rows.
+* [ ] df.sample(n=10)：Randomly select n rows.
+* [ ] df.nlargest(n, 'value')：Select and order top n entries.
+* [ ] df.nsmallest(n, 'value')：Select and order bottom n entries
+
+#### 1.5.3.1. Summary functions
+
+* sum()
+* count()
+* median()
+* quantile([0.25,0.75])
+* min()
+* max()
+* mean()
+
+* [ ] var()
+* [ ] std()
 
 ## 1.6. 数据清理/处理-增删改
 
 ### 1.6.1. 增
 
 * df.columns = ['a','b','c']：重命名列名
-* df.drop(columns=['Length','Height'])：Drop columns from DataFrame
+
+* [ ] df.assign(Area=lambda df: df.Length*df.Height)
+* [ ] df.insert(loc, column, value, allow_duplicates=False)
 
 ### 1.6.2. 删
 
+* df.drop(columns=['Length','Height'])：Drop columns from DataFrame
 * df.dropna()：删除所有包含空值的行
 * df.dropna(axis=1)：删除所有包含空值的列
 * df.dropna(axis=1,thresh=n)：删除所有小于n个非空值的行
@@ -125,6 +144,7 @@
 
 * pd.isnull()：检查DataFrame对象中的空值，并返回一个Boolean数组
 * pd.notnull()：检查DataFrame对象中的非空值，并返回一个Boolean数组
+* pd.isin()
 * df[df[col] > 0.5]：选择col列的值大于0.5的行
 
 ### 1.7.2. 排序
@@ -149,8 +169,8 @@
 
 * df.groupby(col)：返回一个按列col进行分组的Groupby对象
 * df.groupby([col1,col2])：返回一个按多列进行分组的Groupby对象
-* df.groupby(col1)[col2]：返回按列col1进行分组后，列col2的均值
-* df.groupby(col1).agg(np.mean)：返回按列col1分组的所有列的均值
+* *df.groupby(col1)[col2]：返回按列col1进行分组后，列col2的均值?是否缺agg*
+* df.groupby(col1).**agg**(np.mean)：返回按列col1分组的所有列的均值
 
 ## 1.9. 数据合并
 
@@ -189,26 +209,16 @@
 
 ## 1.13. 下一步计划
 
-* [ ] **合并自己整理的速查表功能项**
-* [ ] *将官方速查表功能项*
-* [ ] *添加重点函数重点参数*
-* [ ] *VSCode选择和操作多行*
+* [X] VSCode选择和操作多行
 
-  > ## [Multiple selections (multi-cursor)](https://code.visualstudio.com/docs/editor/codebasics#_multiple-selections-multicursor)
+  > [Multiple selections (multi-cursor)](https://code.visualstudio.com/docs/editor/codebasics#_multiple-selections-multicursor)
   >
-  > VS Code supports multiple cursors for fast simultaneous edits. You can add secondary cursors (rendered thinner) with **Alt+Click**. Each cursor operates independently based on the context it sits in. A common way to add more cursors is with **Ctrl+Alt+Down** or **Ctrl+Alt+Up** that insert cursors below or above.
-  >
-  >> **Note:** Your graphics card driver (for example NVIDIA) might overwrite these default shortcuts.
-  >>
-  >
-  > ![Multi-cursor](https://code.visualstudio.com/assets/docs/editor/codebasics/multicursor.gif)
-  >
-  > **Ctrl+D** selects the word at the cursor, or the next occurrence of the current selection.
-  >
-  > ![Multi-cursor-next-word](https://code.visualstudio.com/assets/docs/editor/codebasics/multicursor-word.gif)
-  >
-  >> **Tip:** You can also add more cursors with **Ctrl+Shift+L**, which will add a selection at each occurrence of the current selected text.
-  >>
-  >
-* [ ]
-* [ ]
+  > Alt+Click;
+  > Ctrl+Alt+Down;
+  > Ctrl+Alt+Up;
+  > Ctrl+D;
+  > Ctrl+Shift+L;
+  
+* [X] 将官方速查表功能项
+* [ ] 合并自己整理的速查表功能项
+* [ ] 添加重点函数重点参数
