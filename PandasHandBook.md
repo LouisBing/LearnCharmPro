@@ -1,35 +1,55 @@
-# ****1. PandasHandBook
+# 1. PandasHandBook
 
 ## 1.1. 目录
 
-- [****1. PandasHandBook](#1-pandashandbook)
+- [1. PandasHandBook](#1-pandashandbook)
   - [1.1. 目录](#11-目录)
   - [1.2. 创建对象](#12-创建对象)
   - [1.3. 导入数据](#13-导入数据)
+    - [1.3.1. 常用](#131-常用)
+    - [1.3.2. 其它](#132-其它)
   - [1.4. 数据合并](#14-数据合并)
   - [1.5. 查看、选取、检查数据](#15-查看选取检查数据)
     - [1.5.1. 查看](#151-查看)
-      - [1.5.1.1. 高级](#1511-高级)
+    - [1.5.1.1. 高级](#1511-高级)
     - [1.5.2. 选取](#152-选取)
-  - [1.6. 数据清理](#16-数据清理)
+  - [1.6. 数据清理/处理-增删改](#16-数据清理处理-增删改)
+    - [1.6.1. 增](#161-增)
+    - [1.6.2. 删](#162-删)
+    - [1.6.3. 改](#163-改)
   - [1.7. 数据处理：Filter、Sort和GroupBy](#17-数据处理filtersort和groupby)
-  - [1.8. 数据合并](#18-数据合并)
-  - [1.9. 数据统计](#19-数据统计)
-  - [1.10. 导出数据](#110-导出数据)
-  - [1.11. 网页参考](#111-网页参考)
-  - [1.12. 下一步计划](#112-下一步计划)
+    - [1.7.1. 筛选](#171-筛选)
+    - [1.7.2. 排序](#172-排序)
+    - [1.7.3. 变型（Reshaping）](#173-变型reshaping)
+  - [1.8. 数据分析](#18-数据分析)
+    - [1.8.1. 分组](#181-分组)
+  - [1.9. 数据合并](#19-数据合并)
+  - [1.10. 数据统计](#110-数据统计)
+  - [1.11. 导出数据](#111-导出数据)
+  - [1.12. 网页参考](#112-网页参考)
+    - [1.12.1. 链接本地文件](#1121-链接本地文件)
+  - [1.13. 下一步计划](#113-下一步计划)
 
 ## 1.2. 创建对象
 
-* pd.DataFrame(np.random.rand(20,5))：创建20行5列的随机数组成的DataFrame对象
 * pd.Series(my_list)：从可迭代对象my_list创建一个Series对象
+* pd.DataFrame(np.random.rand(20,5))：创建20行5列的随机数组成的DataFrame对象
 * df.index = pd.date_range('1900/1/30', periods=df.shape[0])：增加一个日期索引
+* ```
+  s = pd.Series([1, 3, 5, np.nan, 6, 8])
+  df = pd.DataFrame({'A': 1.,'B': pd.Timestamp('20130102')})
+  ```
 
 ## 1.3. 导入数据
 
-* pd.read_csv(filename)：从CSV文件导入数据
-* pd.read_table(filename)：从限定分隔符的文本文件导入数据
+### 1.3.1. 常用
+
 * pd.read_excel(filename)：从Excel文件导入数据
+* pd.read_csv(filename)：从CSV文件导入数据
+
+### 1.3.2. 其它
+
+* pd.read_table(filename)：从限定分隔符的文本文件导入数据
 * pd.read_sql(query, connection_object)：从SQL表/库导入数据
 * pd.read_json(json_string)：从JSON格式的字符串导入数据
 * pd.read_html(url)：解析URL、字符串或者HTML文件，抽取其中的tables表格
@@ -53,11 +73,16 @@
 * df.info()：查看索引、数据类型和内存信息
 * df.describe()：查看数值型列的汇总统计
 
-#### 1.5.1.1. 高级
+### 1.5.1.1. 高级
 
 * s.value_counts(dropna=False)：查看Series对象的唯一值和计数
-* s..unique()：查看唯一值
+* s.unique()：查看唯一值
 * df.apply(pd.Series.value_counts)：查看DataFrame对象中每一列的唯一值和计数
+* df.sample(frac=0.5)：Randomly select fraction of rows. 
+* df.sample(n=10)：Randomly select n rows.
+* df.iloc[10:20]：Select rows by position.
+* df.nlargest(n, 'value')：Select and order top n entries.
+* df.nsmallest(n, 'value')：Select and order bottom n entries
 
 ### 1.5.2. 选取
 
@@ -68,42 +93,71 @@
 * df.iloc[0,:]：返回第一行
 * df.iloc[0,0]：返回第一列的第一个元素
 
-## 1.6. 数据清理
+## 1.6. 数据清理/处理-增删改
+
+### 1.6.1. 增
 
 * df.columns = ['a','b','c']：重命名列名
-* pd.isnull()：检查DataFrame对象中的空值，并返回一个Boolean数组
-* pd.notnull()：检查DataFrame对象中的非空值，并返回一个Boolean数组
+* df.drop(columns=['Length','Height'])：Drop columns from DataFrame
+
+### 1.6.2. 删
+
 * df.dropna()：删除所有包含空值的行
 * df.dropna(axis=1)：删除所有包含空值的列
 * df.dropna(axis=1,thresh=n)：删除所有小于n个非空值的行
+* df.drop_duplicates()：Remove duplicate rows (only considers columns).
+
+### 1.6.3. 改
+
+* df.reset_index()：Reset index of DataFrame to row numbers, moving index to columns
+* df.set_index('column_one')：更改索引列
+* df.rename(columns=lambda x: x + 1)：批量更改列名
+* df.rename(columns={'old_name': 'new_ name'})：选择性更改列名
+* df.rename(index=lambda x: x + 1)：批量重命名索引
 * df.fillna(x)：用x替换DataFrame对象中所有的空值
 * s.astype(float)：将Series中的数据类型更改为float类型
 * s.replace(1,'one')：用‘one’代替所有等于1的值
 * s.replace([1,3],['one','three'])：用'one'代替1，用'three'代替3
-* df.rename(columns=lambda x: x + 1)：批量更改列名
-* df.rename(columns={'old_name': 'new_ name'})：选择性更改列名
-* df.set_index('column_one')：更改索引列
-* df.rename(index=lambda x: x + 1)：批量重命名索引
 
 ## 1.7. 数据处理：Filter、Sort和GroupBy
 
+### 1.7.1. 筛选
+
+* pd.isnull()：检查DataFrame对象中的空值，并返回一个Boolean数组
+* pd.notnull()：检查DataFrame对象中的非空值，并返回一个Boolean数组
 * df[df[col] > 0.5]：选择col列的值大于0.5的行
+
+### 1.7.2. 排序
+
 * df.sort_values(col1)：按照列col1排序数据，默认升序排列
 * df.sort_values(col2, ascending=False)：按照列col1降序排列数据
 * df.sort_values([col1,col2], ascending=[True,False])：先按列col1升序排列，后按col2降序排列数据
-* df.groupby(col)：返回一个按列col进行分组的Groupby对象
-* df.groupby([col1,col2])：返回一个按多列进行分组的Groupby对象
-* df.groupby(col1)[col2]：返回按列col1进行分组后，列col2的均值
+* df.sort_index()：Sort the index of a DataFrame
+
+### 1.7.3. 变型（Reshaping）
+
+* pd.melt(df)：Gather columns into rows
+* df.pivot(columns='var', values='val')：Spread rows into columns
+
+## 1.8. 数据分析
+
 * df.pivot_table(index=col1, values=[col2,col3], aggfunc=max)：创建一个按列col1进行分组，并计算col2和col3的最大值的数据透视表
-* df.groupby(col1).agg(np.mean)：返回按列col1分组的所有列的均值
 * data.apply(np.mean)：对DataFrame中的每一列应用函数np.mean
 * data.apply(np.max,axis=1)：对DataFrame中的每一行应用函数np.max
 
-## 1.8. 数据合并
+### 1.8.1. 分组
+
+* df.groupby(col)：返回一个按列col进行分组的Groupby对象
+* df.groupby([col1,col2])：返回一个按多列进行分组的Groupby对象
+* df.groupby(col1)[col2]：返回按列col1进行分组后，列col2的均值
+* df.groupby(col1).agg(np.mean)：返回按列col1分组的所有列的均值
+
+## 1.9. 数据合并
 
 * df1.join(df2,on=col1,how='inner')：对df1的列和df2的列执行SQL形式的join
+* pd.merge()
 
-## 1.9. 数据统计
+## 1.10. 数据统计
 
 * df.describe()：查看数据值列的汇总统计
 * df.mean()：返回所有列的均值
@@ -114,22 +168,26 @@
 * df.median()：返回每一列的中位数
 * df.std()：返回每一列的标准差
 
-## 1.10. 导出数据
+## 1.11. 导出数据
 
-* df.to_csv(filename)：导出数据到CSV文件
 * df.to_excel(filename)：导出数据到Excel文件
+* df.to_csv(filename)：导出数据到CSV文件
 * df.to_sql(table_name, connection_object)：导出数据到SQL表
 * df.to_json(filename)：以Json格式导出数据到文本文件
 
-## 1.11. 网页参考
+## 1.12. 网页参考
 
 * **[Pandas速查手册](https://zhuanlan.zhihu.com/p/25630700)**
 * **[Pandas 速查表 | Cheat Sheet (cheat-sheet.cn)](https://www.cheat-sheet.cn/post/pandas-cheat-sheet/)**
 * **[Pandas Cheat Sheet — Python for Data Science – Dataquest](https://www.dataquest.io/blog/pandas-cheat-sheet/)**
 * **[Vditor-Demo](https://b3log.org/vditor/demo/index.html)**
-*
 
-## 1.12. 下一步计划
+### 1.12.1. 链接本地文件
+
+* **[临时文件](.\\PandasManual.py)**
+* **[临时文件](file:///C://Users//Bing//Desktop//临时文件.txt)**
+
+## 1.13. 下一步计划
 
 * [ ] **合并自己整理的速查表功能项**
 * [ ] *将官方速查表功能项*
