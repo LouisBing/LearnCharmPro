@@ -1,21 +1,31 @@
-# 1. PandasHandBook
+# ****1. PandasHandBook
 
 ## 1.1. 目录
 
-- [1. PandasHandBook](#1-pandashandbook)
+- [****1. PandasHandBook](#1-pandashandbook)
   - [1.1. 目录](#11-目录)
-  - [1.2. 导入数据](#12-导入数据)
-  - [1.3. 导出数据](#13-导出数据)
-  - [1.4. 创建测试对象](#14-创建测试对象)
-  - [1.5. 查看、检查数据](#15-查看检查数据)
-  - [1.6. 数据选取](#16-数据选取)
-  - [1.7. 数据清理](#17-数据清理)
-  - [1.8. 数据处理：Filter、Sort和GroupBy](#18-数据处理filtersort和groupby)
-  - [1.9. 数据合并](#19-数据合并)
-  - [1.10. 数据统计](#110-数据统计)
+  - [1.2. 创建对象](#12-创建对象)
+  - [1.3. 导入数据](#13-导入数据)
+  - [1.4. 数据合并](#14-数据合并)
+  - [1.5. 查看、选取、检查数据](#15-查看选取检查数据)
+    - [1.5.1. 查看](#151-查看)
+      - [1.5.1.1. 高级](#1511-高级)
+    - [1.5.2. 选取](#152-选取)
+  - [1.6. 数据清理](#16-数据清理)
+  - [1.7. 数据处理：Filter、Sort和GroupBy](#17-数据处理filtersort和groupby)
+  - [1.8. 数据合并](#18-数据合并)
+  - [1.9. 数据统计](#19-数据统计)
+  - [1.10. 导出数据](#110-导出数据)
   - [1.11. 网页参考](#111-网页参考)
+  - [1.12. 下一步计划](#112-下一步计划)
 
-## 1.2. 导入数据
+## 1.2. 创建对象
+
+* pd.DataFrame(np.random.rand(20,5))：创建20行5列的随机数组成的DataFrame对象
+* pd.Series(my_list)：从可迭代对象my_list创建一个Series对象
+* df.index = pd.date_range('1900/1/30', periods=df.shape[0])：增加一个日期索引
+
+## 1.3. 导入数据
 
 * pd.read_csv(filename)：从CSV文件导入数据
 * pd.read_table(filename)：从限定分隔符的文本文件导入数据
@@ -26,30 +36,30 @@
 * pd.read_clipboard()：从你的粘贴板获取内容，并传给read_table()
 * pd.DataFrame(dict)：从字典对象导入数据，Key是列名，Value是数据
 
-## 1.3. 导出数据
+## 1.4. 数据合并
 
-* df.to_csv(filename)：导出数据到CSV文件
-* df.to_excel(filename)：导出数据到Excel文件
-* df.to_sql(table_name, connection_object)：导出数据到SQL表
-* df.to_json(filename)：以Json格式导出数据到文本文件
+* df1.append(df2)：将df2中的行添加到df1的尾部
+* df.concat([df1, df2],axis=1)：将df2中的列添加到df1的尾部
 
-## 1.4. 创建测试对象
+## 1.5. 查看、选取、检查数据
 
-* pd.DataFrame(np.random.rand(20,5))：创建20行5列的随机数组成的DataFrame对象
-* pd.Series(my_list)：从可迭代对象my_list创建一个Series对象
-* df.index = pd.date_range('1900/1/30', periods=df.shape[0])：增加一个日期索引
+### 1.5.1. 查看
 
-## 1.5. 查看、检查数据
-
+* df.index
+* df.columns
 * df.head(n)：查看DataFrame对象的前n行
 * df.tail(n)：查看DataFrame对象的最后n行
 * df.shape()：查看行数和列数
-* [**http://****df.info()**](https://link.zhihu.com/?target=http%3A//df.info%28%29)：查看索引、数据类型和内存信息
+* df.info()：查看索引、数据类型和内存信息
 * df.describe()：查看数值型列的汇总统计
+
+#### 1.5.1.1. 高级
+
 * s.value_counts(dropna=False)：查看Series对象的唯一值和计数
+* s..unique()：查看唯一值
 * df.apply(pd.Series.value_counts)：查看DataFrame对象中每一列的唯一值和计数
 
-## 1.6. 数据选取
+### 1.5.2. 选取
 
 * df[col]：根据列名，并以Series的形式返回列
 * df[[col1, col2]]：以DataFrame形式返回多列
@@ -58,7 +68,7 @@
 * df.iloc[0,:]：返回第一行
 * df.iloc[0,0]：返回第一列的第一个元素
 
-## 1.7. 数据清理
+## 1.6. 数据清理
 
 * df.columns = ['a','b','c']：重命名列名
 * pd.isnull()：检查DataFrame对象中的空值，并返回一个Boolean数组
@@ -75,7 +85,7 @@
 * df.set_index('column_one')：更改索引列
 * df.rename(index=lambda x: x + 1)：批量重命名索引
 
-## 1.8. 数据处理：Filter、Sort和GroupBy
+## 1.7. 数据处理：Filter、Sort和GroupBy
 
 * df[df[col] > 0.5]：选择col列的值大于0.5的行
 * df.sort_values(col1)：按照列col1排序数据，默认升序排列
@@ -89,13 +99,11 @@
 * data.apply(np.mean)：对DataFrame中的每一列应用函数np.mean
 * data.apply(np.max,axis=1)：对DataFrame中的每一行应用函数np.max
 
-## 1.9. 数据合并
+## 1.8. 数据合并
 
-* df1.append(df2)：将df2中的行添加到df1的尾部
-* df.concat([df1, df2],axis=1)：将df2中的列添加到df1的尾部
 * df1.join(df2,on=col1,how='inner')：对df1的列和df2的列执行SQL形式的join
 
-## 1.10. 数据统计
+## 1.9. 数据统计
 
 * df.describe()：查看数据值列的汇总统计
 * df.mean()：返回所有列的均值
@@ -106,10 +114,43 @@
 * df.median()：返回每一列的中位数
 * df.std()：返回每一列的标准差
 
+## 1.10. 导出数据
+
+* df.to_csv(filename)：导出数据到CSV文件
+* df.to_excel(filename)：导出数据到Excel文件
+* df.to_sql(table_name, connection_object)：导出数据到SQL表
+* df.to_json(filename)：以Json格式导出数据到文本文件
+
 ## 1.11. 网页参考
 
-**[Pandas速查手册](https://zhuanlan.zhihu.com/p/25630700)**
+* **[Pandas速查手册](https://zhuanlan.zhihu.com/p/25630700)**
+* **[Pandas 速查表 | Cheat Sheet (cheat-sheet.cn)](https://www.cheat-sheet.cn/post/pandas-cheat-sheet/)**
+* **[Pandas Cheat Sheet — Python for Data Science – Dataquest](https://www.dataquest.io/blog/pandas-cheat-sheet/)**
+* **[Vditor-Demo](https://b3log.org/vditor/demo/index.html)**
+*
 
-**[Pandas 速查表 | Cheat Sheet (cheat-sheet.cn)](https://www.cheat-sheet.cn/post/pandas-cheat-sheet/)**
+## 1.12. 下一步计划
 
-**[Pandas Cheat Sheet — Python for Data Science – Dataquest](https://www.dataquest.io/blog/pandas-cheat-sheet/)**
+* [ ] **合并自己整理的速查表功能项**
+* [ ] *将官方速查表功能项*
+* [ ] *添加重点函数重点参数*
+* [ ] *VSCode选择和操作多行*
+
+  > ## [Multiple selections (multi-cursor)](https://code.visualstudio.com/docs/editor/codebasics#_multiple-selections-multicursor)
+  >
+  > VS Code supports multiple cursors for fast simultaneous edits. You can add secondary cursors (rendered thinner) with **Alt+Click**. Each cursor operates independently based on the context it sits in. A common way to add more cursors is with **Ctrl+Alt+Down** or **Ctrl+Alt+Up** that insert cursors below or above.
+  >
+  >> **Note:** Your graphics card driver (for example NVIDIA) might overwrite these default shortcuts.
+  >>
+  >
+  > ![Multi-cursor](https://code.visualstudio.com/assets/docs/editor/codebasics/multicursor.gif)
+  >
+  > **Ctrl+D** selects the word at the cursor, or the next occurrence of the current selection.
+  >
+  > ![Multi-cursor-next-word](https://code.visualstudio.com/assets/docs/editor/codebasics/multicursor-word.gif)
+  >
+  >> **Tip:** You can also add more cursors with **Ctrl+Shift+L**, which will add a selection at each occurrence of the current selected text.
+  >>
+  >
+* [ ]
+* [ ]
