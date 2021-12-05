@@ -42,7 +42,8 @@ for packi in range(2, size_l):
     # print(packinfo)
     # pipupc = 'pip install --upgrade %s==%s' % (packinfo[0], packinfo[2])
     pipupc = 'pip install --upgrade %s' % (packinfo[0], )
-
+    if(packinfo[0]=='xlrd'):
+        continue
     print(pipupc)
     os.system(pipupc)
 
