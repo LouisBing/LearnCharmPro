@@ -42,3 +42,23 @@ except:
     # raise
 else:
     print('c=%s' % c)
+
+# %%
+import PandasHandBook
+
+pdhand = PandasHandBook.PandasHandBook()
+inpl = pdhand.getInputsList('多表合并')
+
+# 单文件多表合并
+multi_sheets_file = inpl[1]
+he, pda = pdhand.singlefile_multi_sheets_concat(multi_sheets_file)
+print(he, pda)
+pdhand.to_excel_dflist(multi_sheets_file, [he, pda])
+
+# 文件夹多文件合并
+folder = inpl[5]
+he, pda, outfile_xls = pdhand.folder_multi_file_concat(folder, headerrows=2, new_colname='wenjian')
+# pdhand.rename_title(pda, title_index=9)
+drop, con = pdhand.divide_with_na_col(pda, subset_col=[2])
+he = he.append(drop)
+pdhand.to_excel_dflist(outfile_xls, [con, he], need_add_time=False)
